@@ -143,16 +143,16 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
   ];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ed_0%,_#ffedd5_38%,_#fed7aa_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-orange-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(154,52,18,0.45)] backdrop-blur">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}`}
-            className="inline-flex rounded-full border border-orange-300 px-3 py-1 text-xs font-semibold text-orange-700"
+            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
           >
             ย้อนกลับ
           </Link>
-          <p className="text-sm font-semibold text-orange-800">ยืนยัน</p>
+          <p className="text-sm font-semibold text-sky-800">ยืนยัน</p>
         </div>
 
         <div className="mt-3">
@@ -165,31 +165,31 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           </p>
         ) : null}
 
-        <section className="mt-3 rounded-2xl border border-orange-200 bg-white p-4">
-          <p className="text-sm font-semibold text-orange-900">ยืนยันการจอง</p>
+        <section className="mt-3 rounded-2xl border border-sky-200 bg-white p-4">
+          <p className="text-sm font-semibold text-sky-900">ยืนยันการจอง</p>
 
-          <div className="mt-2 divide-y divide-orange-100 rounded-xl border border-orange-100 bg-orange-50/60">
+          <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
             <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-orange-700">สาขา</span>
-              <span className="min-w-0 truncate font-medium text-orange-900">
+              <span className="w-14 shrink-0 text-sky-700">สาขา</span>
+              <span className="min-w-0 truncate font-medium text-sky-900">
                 {branchName}
               </span>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-orange-700">วันที่</span>
-              <span className="min-w-0 truncate font-medium text-orange-900">
+              <span className="w-14 shrink-0 text-sky-700">วันที่</span>
+              <span className="min-w-0 truncate font-medium text-sky-900">
                 {thaiDateLabel}
               </span>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-orange-700">เวลา</span>
-              <span className="min-w-0 truncate font-medium text-orange-900">
+              <span className="w-14 shrink-0 text-sky-700">เวลา</span>
+              <span className="min-w-0 truncate font-medium text-sky-900">
                 {slotLabel}
               </span>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-orange-700">พนักงาน</span>
-              <span className="min-w-0 truncate font-medium text-orange-900">
+              <span className="w-14 shrink-0 text-sky-700">พนักงาน</span>
+              <span className="min-w-0 truncate font-medium text-sky-900">
                 {staffName}
               </span>
             </div>

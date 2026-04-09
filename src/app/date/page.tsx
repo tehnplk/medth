@@ -173,16 +173,16 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
   ];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ed_0%,_#ffedd5_38%,_#fed7aa_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-orange-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(154,52,18,0.45)] backdrop-blur">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex rounded-full border border-orange-300 px-3 py-1 text-xs font-semibold text-orange-700"
+            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
           >
             ย้อนกลับ
           </Link>
-          <p className="text-sm font-semibold text-orange-800">เลือกวันที่</p>
+          <p className="text-sm font-semibold text-sky-800">เลือกวันที่</p>
         </div>
 
         <div className="mt-3">
@@ -196,13 +196,13 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {!hasDbError && !branchName ? (
-          <p className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             ไม่พบสาขาที่เลือก กรุณาเลือกสาขาใหม่
           </p>
         ) : null}
 
         {!hasDbError && branchName ? (
-          <p className="mt-3 text-sm text-orange-900/80">สาขา: {branchName}</p>
+          <p className="mt-3 text-sm text-sky-900/80">สาขา: {branchName}</p>
         ) : null}
 
         <section className="mt-4 grid grid-cols-2 gap-3">
@@ -214,14 +214,14 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
                 href={`/time?branch=${branchId}&date=${item.key}`}
                 className={`rounded-2xl border px-3 py-3 text-left transition ${
                   isSelected
-                    ? "border-orange-500 bg-orange-50 shadow-[0_8px_20px_-14px_rgba(194,65,12,0.7)]"
-                    : "border-orange-200 bg-white hover:border-orange-300"
+                    ? "border-sky-500 bg-sky-50 shadow-[0_8px_20px_-14px_rgba(59,130,246,0.45)]"
+                    : "border-sky-200 bg-white hover:border-sky-300"
                 }`}
               >
-                <span className="block text-sm font-semibold text-orange-950">
+                <span className="block text-sm font-semibold text-sky-950">
                   {item.dayLabel}
                 </span>
-                <span className="mt-1 block text-sm text-orange-800">
+                <span className="mt-1 block text-sm text-sky-800">
                   {item.dateLabel}
                 </span>
                 <span

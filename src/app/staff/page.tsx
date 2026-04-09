@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
+import ThumbnailPlaceholder from "@/components/thumbnail-placeholder";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -155,16 +156,16 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
   ];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ed_0%,_#ffedd5_38%,_#fed7aa_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-orange-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(154,52,18,0.45)] backdrop-blur">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/time?branch=${branchId}&date=${dateParam}`}
-            className="inline-flex rounded-full border border-orange-300 px-3 py-1 text-xs font-semibold text-orange-700"
+            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
           >
             ย้อนกลับ
           </Link>
-          <p className="text-sm font-semibold text-orange-800">เลือกพนักงาน</p>
+          <p className="text-sm font-semibold text-sky-800">เลือกพนักงาน</p>
         </div>
 
         <div className="mt-3">
@@ -178,20 +179,20 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {!hasDbError && !branchName ? (
-          <p className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             ไม่พบข้อมูลที่เลือก กรุณาเริ่มใหม่
           </p>
         ) : null}
 
         {!hasDbError && branchName ? (
-          <p className="mt-3 text-sm text-orange-900/80">
+          <p className="mt-3 text-sm text-sky-900/80">
             {branchName} | {thaiDateLabel}
             {slotLabel ? ` | เวลา ${slotLabel}` : ""}
           </p>
         ) : null}
 
         {slotLabel ? null : (
-          <p className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             กรุณาเลือกช่วงเวลาก่อน
           </p>
         )}
@@ -199,7 +200,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
         {slotLabel ? (
           <section className="mt-4 grid grid-cols-1 gap-3">
             {staffList.length === 0 ? (
-              <p className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+              <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
                 ยังไม่มีพนักงานพร้อมให้บริการในสาขานี้
               </p>
             ) : null}
@@ -210,25 +211,30 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                 <div
                   className={`rounded-2xl border px-4 py-3 transition ${
                     isBooked
-                      ? "border-zinc-200 bg-zinc-100/80 opacity-70"
-                      : "border-orange-200 bg-white hover:border-orange-300 hover:bg-orange-50"
+                      ? "border-sky-100 bg-sky-50/70 opacity-80"
+                      : "border-sky-200 bg-white hover:border-sky-300 hover:bg-sky-50"
                   }`}
                 >
-                  <p className="text-sm font-semibold text-orange-950">
-                    {staff.full_name}
-                  </p>
-                  <p className="mt-1 text-xs text-orange-800/80">
-                    รหัส: {staff.staff_code}
-                  </p>
-                  <p className="mt-1 text-xs text-orange-800/80">
-                    ทักษะ: {staff.skill_note ?? "-"}
-                  </p>
-                  <p className="mt-1 text-xs text-orange-700/80">
-                    โทร: {staff.phone ?? "-"}
-                  </p>
-                  {isBooked ? (
-                    <p className="mt-2 text-xs font-semibold text-zinc-500">จองแล้ว</p>
-                  ) : null}
+                  <div className="flex items-start gap-4">
+                    <ThumbnailPlaceholder kind="staff" label={staff.full_name} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-sky-950">
+                        {staff.full_name}
+                      </p>
+                      <p className="mt-1 text-xs text-sky-800/80">
+                        รหัส: {staff.staff_code}
+                      </p>
+                      <p className="mt-1 text-xs text-sky-800/80">
+                        ทักษะ: {staff.skill_note ?? "-"}
+                      </p>
+                      <p className="mt-1 text-xs text-sky-700/80">
+                        โทร: {staff.phone ?? "-"}
+                      </p>
+                      {isBooked ? (
+                        <p className="mt-2 text-xs font-semibold text-sky-600">จองแล้ว</p>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               );
 

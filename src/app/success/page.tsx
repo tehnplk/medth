@@ -109,9 +109,9 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
   const qrUrl = await QRCode.toDataURL(qrPayload);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ed_0%,_#ffedd5_38%,_#fed7aa_100%)] px-4 py-6 sm:px-6">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
       <SuccessHistoryLock />
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-orange-200/80 bg-white/95 p-5 shadow-[0_12px_32px_-18px_rgba(154,52,18,0.45)]">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/95 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)]">
         <p className="text-sm font-semibold text-green-700">จองสำเร็จ</p>
 
         {!receipt ? (
@@ -119,49 +119,49 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
             <p className="text-sm text-red-700">ไม่พบข้อมูลใบจอง</p>
           </div>
         ) : (
-          <section className="mt-3 rounded-2xl border border-orange-200 bg-white p-4">
-            <p className="text-sm font-semibold text-orange-900">ใบจอง</p>
+          <section className="mt-3 rounded-2xl border border-sky-200 bg-white p-4">
+            <p className="text-sm font-semibold text-sky-900">ใบจอง</p>
 
-            <div className="mt-2 divide-y divide-orange-100 rounded-xl border border-orange-100 bg-orange-50/60">
+            <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">รหัสจอง</span>
-                <span className="min-w-0 truncate font-semibold text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">รหัสจอง</span>
+                <span className="min-w-0 truncate font-semibold text-sky-900">
                   {receipt.booking_code}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">ผู้จอง</span>
-                <span className="min-w-0 truncate font-medium text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">ผู้จอง</span>
+                <span className="min-w-0 truncate font-medium text-sky-900">
                   {receipt.customer_name}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">เบอร์โทร</span>
-                <span className="min-w-0 truncate font-medium text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">เบอร์โทร</span>
+                <span className="min-w-0 truncate font-medium text-sky-900">
                   {receipt.customer_phone}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">สาขา</span>
-                <span className="min-w-0 truncate font-medium text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">สาขา</span>
+                <span className="min-w-0 truncate font-medium text-sky-900">
                   {receipt.branch_name}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">วันที่</span>
-                <span className="min-w-0 truncate font-medium text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">วันที่</span>
+                <span className="min-w-0 truncate font-medium text-sky-900">
                   {toThaiDateLabel(receipt.booking_date)}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">เวลา</span>
-                <span className="min-w-0 truncate font-medium text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">เวลา</span>
+                <span className="min-w-0 truncate font-medium text-sky-900">
                   {formatTime(receipt.begin_time)} - {formatTime(receipt.end_time)}น.
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-orange-700">พนักงาน</span>
-                <span className="min-w-0 truncate font-medium text-orange-900">
+                <span className="w-16 shrink-0 text-sky-700">พนักงาน</span>
+                <span className="min-w-0 truncate font-medium text-sky-900">
                   {receipt.staff_name}
                 </span>
               </div>
@@ -174,7 +174,7 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
                 width={220}
                 height={220}
                 unoptimized
-                className="rounded-xl border border-orange-200 bg-white p-2"
+                className="rounded-xl border border-sky-200 bg-white p-2"
               />
             </div>
           </section>
@@ -182,7 +182,7 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
 
         <Link
           href="/"
-          className="mt-4 inline-flex w-full justify-center rounded-xl bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-700"
+          className="mt-4 inline-flex w-full justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
         >
           กลับหน้าแรก
         </Link>

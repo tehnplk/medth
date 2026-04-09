@@ -156,16 +156,16 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   ];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#fff7ed_0%,_#ffedd5_38%,_#fed7aa_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-orange-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(154,52,18,0.45)] backdrop-blur">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/date?branch=${branchId}`}
-            className="inline-flex rounded-full border border-orange-300 px-3 py-1 text-xs font-semibold text-orange-700"
+            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
           >
             ย้อนกลับ
           </Link>
-          <p className="text-sm font-semibold text-orange-800">เลือกเวลา</p>
+          <p className="text-sm font-semibold text-sky-800">เลือกเวลา</p>
         </div>
 
         <div className="mt-3">
@@ -179,20 +179,20 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {!hasDbError && !branchName ? (
-          <p className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             ไม่พบสาขาที่เลือก กรุณาเลือกสาขาใหม่
           </p>
         ) : null}
 
         {!hasDbError && branchName ? (
-          <p className="mt-3 text-sm text-orange-900/80">
+          <p className="mt-3 text-sm text-sky-900/80">
             {branchName} | {thaiDateLabel}
             {slotLabel ? ` | เวลา ${slotLabel}` : ""}
           </p>
         ) : null}
 
         {dateParam ? null : (
-          <p className="mt-3 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             กรุณาเลือกวันที่ก่อน
           </p>
         )}
@@ -200,7 +200,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         {dateParam ? (
           <section className="mt-4 grid grid-cols-2 gap-3">
             {slots.length === 0 ? (
-              <p className="col-span-2 rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-700">
+              <p className="col-span-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
                 ยังไม่มีช่วงเวลาในสาขานี้
               </p>
             ) : null}
@@ -214,11 +214,13 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
                   href={`/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
                   className={`rounded-2xl border px-3 py-3 text-center text-sm font-semibold transition ${
                     isSelected
-                      ? "border-orange-500 bg-orange-50 text-orange-900 shadow-[0_8px_20px_-14px_rgba(194,65,12,0.7)]"
-                      : "border-orange-200 bg-white text-orange-800 hover:border-orange-300"
+                      ? "border-sky-500 bg-sky-50 text-sky-900 shadow-[0_8px_20px_-14px_rgba(59,130,246,0.45)]"
+                      : "border-sky-200 bg-white text-sky-800 hover:border-sky-300"
                   }`}
                 >
-                  <span className="block">{label}</span>
+                  <span className="block">
+                    {label}
+                  </span>
                   <span
                     className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${
                       slot.available_staff_count === 0

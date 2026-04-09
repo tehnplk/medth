@@ -50,7 +50,7 @@ export default function ConfirmBookingForm({
       action="/confirm/submit"
       method="POST"
       onSubmit={handleSubmit}
-      className="mt-4 rounded-2xl border border-orange-200 bg-white p-4"
+      className="mt-4 rounded-2xl border border-sky-200 bg-white/90 p-4 shadow-[0_10px_24px_-18px_rgba(37,99,235,0.22)]"
     >
       <input type="hidden" name="branch" value={branch} />
       <input type="hidden" name="date" value={date} />
@@ -59,7 +59,7 @@ export default function ConfirmBookingForm({
 
       <div className="space-y-3">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-orange-900">
+          <span className="mb-1 block text-sm font-medium text-sky-900">
             ชื่อผู้จอง
           </span>
           <input
@@ -69,12 +69,12 @@ export default function ConfirmBookingForm({
             value={firstName}
             onChange={(event) => setFirstName(event.target.value)}
             placeholder="ชื่อ"
-            className="w-full rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-900 outline-none focus:border-orange-400"
+            className="w-full rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 outline-none focus:border-sky-400"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-orange-900">
+          <span className="mb-1 block text-sm font-medium text-sky-900">
             นามสกุล
           </span>
           <input
@@ -84,12 +84,12 @@ export default function ConfirmBookingForm({
             value={lastName}
             onChange={(event) => setLastName(event.target.value)}
             placeholder="นามสกุล"
-            className="w-full rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-900 outline-none focus:border-orange-400"
+            className="w-full rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 outline-none focus:border-sky-400"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-orange-900">
+          <span className="mb-1 block text-sm font-medium text-sky-900">
             เบอร์โทร
           </span>
           <input
@@ -102,14 +102,14 @@ export default function ConfirmBookingForm({
             maxLength={12}
             pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
             placeholder="000-000-0000"
-            className="w-full rounded-xl border border-orange-200 bg-orange-50 px-3 py-2 text-sm text-orange-900 outline-none focus:border-orange-400"
+            className="w-full rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-900 outline-none focus:border-sky-400"
           />
         </label>
 
         <button
           type="submit"
           disabled={!canSubmit || isSubmitting}
-          className="mt-2 w-full rounded-xl bg-orange-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-orange-300"
+          className="mt-2 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-300"
         >
           {isSubmitting ? "กำลังยืนยัน..." : "ยืนยันการจอง"}
         </button>
