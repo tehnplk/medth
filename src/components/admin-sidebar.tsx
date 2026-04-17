@@ -7,7 +7,6 @@ import {
   ChevronRight,
   LayoutGrid,
   MapPinned,
-  Power,
   UsersRound,
 } from "lucide-react";
 
@@ -36,12 +35,6 @@ const menuItems = [
     description: "ช่วงเวลาเปิดรับจอง",
     icon: CalendarClock,
   },
-  {
-    href: "/admin/open-close",
-    label: "จัดการปิด-เปิด",
-    description: "สถานะการเปิดใช้งาน",
-    icon: Power,
-  },
 ];
 
 export default function AdminSidebar() {
@@ -54,9 +47,6 @@ export default function AdminSidebar() {
           MedTH Admin
         </p>
         <p className="mt-2 text-lg font-semibold">จัดการข้อมูลระบบจอง</p>
-        <p className="mt-1 text-sm text-sky-100/90">
-          เลือกเมนูด้านล่างเพื่อจัดการข้อมูลแต่ละส่วน
-        </p>
       </div>
 
       <nav className="space-y-2">

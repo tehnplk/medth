@@ -1,5 +1,7 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
-import { CalendarClock, ChevronRight, MapPinned, Power, UsersRound } from "lucide-react";
+import { CalendarClock, ChevronRight, MapPinned, UsersRound } from "lucide-react";
 import { query } from "@/lib/db";
 
 type CountRow = {
@@ -29,12 +31,6 @@ const adminLinks = [
     label: "จัดการเวลาจอง",
     description: "ดูช่วงเวลาที่เปิดรับจองของแต่ละสาขา",
     icon: CalendarClock,
-  },
-  {
-    href: "/admin/open-close",
-    label: "จัดการปิด-เปิด",
-    description: "สรุปสถานะการเปิดใช้งานแต่ละสาขา",
-    icon: Power,
   },
 ];
 

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import AdminStaffGrid from "@/components/admin-staff-grid";
 import { query } from "@/lib/db";
 

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 type AdminModalProps = {
@@ -20,7 +21,7 @@ export default function AdminModal({
 }: AdminModalProps) {
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px] border border-sky-200 bg-white p-5 shadow-[0_30px_60px_-30px_rgba(15,23,42,0.65)]">
         <div className="flex items-start justify-between gap-4">
@@ -42,6 +43,7 @@ export default function AdminModal({
 
         <div className="mt-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { startTransition, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { CalendarOff, ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
 
 type StaffRow = {
@@ -29,6 +30,53 @@ type StaffForm = {
   photo_path: string;
   skill_note: string;
   status: "active" | "inactive";
+};
+
+type LeaveRow = {
+  id: number;
+  staff_id: number;
+  branch_id: number;
+  leave_date: string;
+  leave_type: "sick" | "personal" | "vacation";
+  reason: string | null;
+};
+
+type LeaveForm = {
+  leave_type: "sick" | "personal" | "vacation";
+  reason: string;
+};
+
+const leaveTypeLabels: Record<LeaveRow["leave_type"], string> = {
+  sick: "ลาป่วย",
+  personal: "ลากิจ",
+  vacation: "ลาพักร้อน",
+};
+
+const thaiMonths = [
+  "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
+  "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.",
+];
+
+const thaiMonthsFull = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+];
+
+const weekDays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+
+function toDateKey(year: number, month: number, day: number) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function formatThaiDate(raw: string) {
+  const datePart = raw.slice(0, 10);
+  const [y, m, d] = datePart.split("-");
+  return `${Number(d)} ${thaiMonths[Number(m) - 1]} ${Number(y) + 543}`;
+}
+
+const emptyLeaveForm: LeaveForm = {
+  leave_type: "personal",
+  reason: "",
 };
 
 const emptyForm: StaffForm = {
@@ -72,17 +120,142 @@ export default function AdminStaffGrid({
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [editingRow, setEditingRow] = useState<StaffRow | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<number>(
+    branches[0]?.id ?? 0,
+  );
+  const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive">("all");
+  const [filterSearch, setFilterSearch] = useState("");
   const [form, setForm] = useState<StaffForm>({
     ...emptyForm,
     branch_id: branches[0] ? String(branches[0].id) : "",
   });
   const [open, setOpen] = useState(false);
 
+  const filteredRows = rows.filter((r) => {
+    if (selectedBranchId && r.branch_id !== selectedBranchId) return false;
+    if (filterStatus !== "all" && r.status !== filterStatus) return false;
+    if (filterSearch) {
+      const q = filterSearch.toLowerCase();
+      return (
+        r.full_name.toLowerCase().includes(q) ||
+        r.staff_code.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
+
+  // --- Leave modal state ---
+  const [leaveOpen, setLeaveOpen] = useState(false);
+  const [leaveStaff, setLeaveStaff] = useState<StaffRow | null>(null);
+  const [leaves, setLeaves] = useState<LeaveRow[]>([]);
+  const [leaveForm, setLeaveForm] = useState<LeaveForm>({ ...emptyLeaveForm });
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [calMonth, setCalMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+  const [leaveLoading, setLeaveLoading] = useState(false);
+  const [leaveSaving, setLeaveSaving] = useState(false);
+  const [leaveError, setLeaveError] = useState("");
+
+  async function openLeaveModal(row: StaffRow) {
+    setLeaveStaff(row);
+    setLeaveForm({ ...emptyLeaveForm });
+    setSelectedDates([]);
+    setLeaveError("");
+    setLeaveOpen(true);
+    setLeaveLoading(true);
+    const now = new Date();
+    setCalMonth({ year: now.getFullYear(), month: now.getMonth() });
+    try {
+      const res = await requestJson<{ rows: LeaveRow[] }>(`/api/admin/staff/${row.id}/leaves`);
+      setLeaves(res.rows);
+    } catch {
+      setLeaveError("โหลดข้อมูลการลาไม่สำเร็จ");
+      setLeaves([]);
+    } finally {
+      setLeaveLoading(false);
+    }
+  }
+
+  function closeLeaveModal() {
+    if (leaveSaving) return;
+    setLeaveOpen(false);
+    setLeaveStaff(null);
+    setLeaves([]);
+    setSelectedDates([]);
+    setLeaveError("");
+  }
+
+  function toggleDate(key: string) {
+    setSelectedDates((cur) =>
+      cur.includes(key) ? cur.filter((d) => d !== key) : [...cur, key],
+    );
+  }
+
+  async function handleLeaveSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!leaveStaff || selectedDates.length === 0) {
+      setLeaveError("กรุณาเลือกอย่างน้อย 1 วัน");
+      return;
+    }
+    setLeaveError("");
+    setLeaveSaving(true);
+    try {
+      const newLeaves: LeaveRow[] = [];
+      for (const date of selectedDates) {
+        const res = await requestJson<{ row: LeaveRow }>(
+          `/api/admin/staff/${leaveStaff.id}/leaves`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              leave_date: date,
+              leave_type: leaveForm.leave_type,
+              reason: leaveForm.reason,
+              branch_id: leaveStaff.branch_id,
+            }),
+          },
+        );
+        newLeaves.push(res.row);
+      }
+      setLeaves((cur) => [...newLeaves, ...cur]);
+      setSelectedDates([]);
+      setLeaveForm({ ...emptyLeaveForm });
+    } catch (err) {
+      setLeaveError(err instanceof Error ? err.message : "บันทึกการลาไม่สำเร็จ");
+    } finally {
+      setLeaveSaving(false);
+    }
+  }
+
+  async function handleLeaveDelete(leave: LeaveRow) {
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: `ลบรายการลาวันที่ ${formatThaiDate(leave.leave_date)} ใช่หรือไม่`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
+    try {
+      await requestJson<{ success: true }>(`/api/admin/staff-leaves/${leave.id}`, {
+        method: "DELETE",
+      });
+      setLeaves((cur) => cur.filter((l) => l.id !== leave.id));
+    } catch {
+      setLeaveError("ลบรายการลาไม่สำเร็จ");
+    }
+  }
+
   function openCreateModal() {
     setEditingRow(null);
     setForm({
       ...emptyForm,
-      branch_id: branches[0] ? String(branches[0].id) : "",
+      branch_id: selectedBranchId ? String(selectedBranchId) : (branches[0] ? String(branches[0].id) : ""),
     });
     setError("");
     setOpen(true);
@@ -147,7 +320,17 @@ export default function AdminStaffGrid({
   }
 
   async function handleDelete(row: StaffRow) {
-    if (!window.confirm(`ลบพนักงาน "${row.full_name}" ใช่หรือไม่`)) return;
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: `ลบพนักงาน "${row.full_name}" ใช่หรือไม่`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
 
     try {
       setError("");
@@ -177,6 +360,49 @@ export default function AdminStaffGrid({
         </button>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        {branches.map((branch) => (
+          <button
+            key={branch.id}
+            type="button"
+            onClick={() => setSelectedBranchId(branch.id)}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+              selectedBranchId === branch.id
+                ? "bg-sky-600 text-white"
+                : "border border-sky-200 text-sky-700 hover:bg-sky-50"
+            }`}
+          >
+            {branch.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          value={filterSearch}
+          onChange={(e) => setFilterSearch(e.target.value)}
+          placeholder="ค้นหาชื่อ / รหัสพนักงาน"
+          className="rounded-full border border-sky-200 px-3 py-1.5 text-sm outline-none focus:border-sky-400 min-w-[200px]"
+        />
+        <div className="flex gap-1.5">
+          {(["all", "active", "inactive"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setFilterStatus(s)}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                filterStatus === s
+                  ? "bg-sky-600 text-white"
+                  : "border border-sky-200 text-sky-700 hover:bg-sky-50"
+              }`}
+            >
+              {s === "all" ? "ทั้งหมด" : s === "active" ? "พร้อมทำงาน" : "ไม่พร้อม"}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {error ? (
         <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -196,7 +422,7 @@ export default function AdminStaffGrid({
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 bg-white">
-            {rows.map((row) => (
+            {filteredRows.map((row) => (
               <tr key={row.id} className="align-top text-slate-700">
                 <td className="px-4 py-3">
                   <p className="font-medium text-slate-900">{row.full_name}</p>
@@ -218,6 +444,14 @@ export default function AdminStaffGrid({
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openLeaveModal(row)}
+                      className="inline-flex items-center gap-1 rounded-full border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-50"
+                    >
+                      <CalendarOff className="h-3.5 w-3.5" />
+                      การลา
+                    </button>
                     <button
                       type="button"
                       onClick={() => openEditModal(row)}
@@ -336,6 +570,200 @@ export default function AdminStaffGrid({
             </button>
           </div>
         </form>
+      </AdminModal>
+
+      {/* Leave modal */}
+      <AdminModal
+        open={leaveOpen}
+        onClose={closeLeaveModal}
+        title={leaveStaff ? `การลา — ${leaveStaff.full_name}` : "การลา"}
+        description={leaveStaff ? `สาขา: ${leaveStaff.branch_name}` : "จัดการวันลาของพนักงาน"}
+      >
+        {leaveError ? (
+          <p className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {leaveError}
+          </p>
+        ) : null}
+
+        <form onSubmit={handleLeaveSubmit} className="mb-5 space-y-4">
+          {/* Calendar */}
+          <div className="rounded-2xl border border-sky-100 p-3">
+            {/* Month navigation */}
+            <div className="mb-3 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() =>
+                  setCalMonth(({ year, month }) => {
+                    const d = new Date(year, month - 1, 1);
+                    return { year: d.getFullYear(), month: d.getMonth() };
+                  })
+                }
+                className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-sky-100"
+              >
+                <ChevronLeft className="h-4 w-4 text-sky-700" />
+              </button>
+              <span className="text-sm font-semibold text-slate-800">
+                {thaiMonthsFull[calMonth.month]} {calMonth.year + 543}
+              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  setCalMonth(({ year, month }) => {
+                    const d = new Date(year, month + 1, 1);
+                    return { year: d.getFullYear(), month: d.getMonth() };
+                  })
+                }
+                className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-sky-100"
+              >
+                <ChevronRight className="h-4 w-4 text-sky-700" />
+              </button>
+            </div>
+            {/* Weekday headers */}
+            <div className="mb-1 grid grid-cols-7 text-center text-xs font-semibold text-slate-500">
+              {weekDays.map((d) => (
+                <div key={d}>{d}</div>
+              ))}
+            </div>
+            {/* Days grid */}
+            {(() => {
+              const { year, month } = calMonth;
+              const firstDay = new Date(year, month, 1).getDay();
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              const existingDates = new Set(leaves.map((l) => l.leave_date.slice(0, 10)));
+              const cells: React.ReactNode[] = [];
+              for (let i = 0; i < firstDay; i++) {
+                cells.push(<div key={`e-${i}`} />);
+              }
+              for (let day = 1; day <= daysInMonth; day++) {
+                const key = toDateKey(year, month, day);
+                const isSelected = selectedDates.includes(key);
+                const isExisting = existingDates.has(key);
+                cells.push(
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => !isExisting && toggleDate(key)}
+                    disabled={isExisting}
+                    className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-sm transition
+                      ${isExisting ? "cursor-not-allowed bg-red-100 text-red-400" : ""}
+                      ${isSelected && !isExisting ? "bg-amber-500 font-semibold text-white" : ""}
+                      ${!isSelected && !isExisting ? "hover:bg-sky-100 text-slate-700" : ""}
+                    `}
+                  >
+                    {day}
+                  </button>,
+                );
+              }
+              return <div className="grid grid-cols-7 gap-y-1">{cells}</div>;
+            })()}
+          </div>
+
+          {/* Selected dates summary */}
+          {selectedDates.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {selectedDates.sort().map((d) => (
+                <span
+                  key={d}
+                  className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700"
+                >
+                  {formatThaiDate(d)}
+                  <button
+                    type="button"
+                    onClick={() => toggleDate(d)}
+                    className="ml-0.5 text-amber-500 hover:text-amber-700"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Type + reason + submit */}
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-slate-700">ประเภท</span>
+              <select
+                value={leaveForm.leave_type}
+                onChange={(e) =>
+                  setLeaveForm((f) => ({
+                    ...f,
+                    leave_type: e.target.value as LeaveForm["leave_type"],
+                  }))
+                }
+                className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+              >
+                <option value="sick">ลาป่วย</option>
+                <option value="personal">ลากิจ</option>
+                <option value="vacation">ลาพักร้อน</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-slate-700">เหตุผล</span>
+              <input
+                value={leaveForm.reason}
+                onChange={(e) => setLeaveForm((f) => ({ ...f, reason: e.target.value }))}
+                placeholder="ไม่ระบุก็ได้"
+                className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+              />
+            </label>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={leaveSaving || selectedDates.length === 0}
+              className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" />
+              {leaveSaving
+                ? "กำลังบันทึก..."
+                : `เพิ่มวันลา${selectedDates.length > 0 ? ` (${selectedDates.length} วัน)` : ""}`}
+            </button>
+          </div>
+        </form>
+
+        {leaveLoading ? (
+          <p className="py-6 text-center text-sm text-slate-500">กำลังโหลด...</p>
+        ) : leaves.length === 0 ? (
+          <p className="py-6 text-center text-sm text-slate-500">ไม่มีรายการลา</p>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-sky-100">
+            <table className="min-w-full divide-y divide-sky-100 text-sm">
+              <thead className="bg-sky-50/80 text-left text-slate-600">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">วันที่</th>
+                  <th className="px-4 py-3 font-semibold">ประเภท</th>
+                  <th className="px-4 py-3 font-semibold">เหตุผล</th>
+                  <th className="px-4 py-3 text-right font-semibold">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-sky-100 bg-white">
+                {leaves.map((leave) => (
+                  <tr key={leave.id} className="text-slate-700">
+                    <td className="px-4 py-3">{formatThaiDate(leave.leave_date)}</td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                        {leaveTypeLabels[leave.leave_type]}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">{leave.reason ?? "-"}</td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleLeaveDelete(leave)}
+                        className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        ลบ
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </AdminModal>
     </div>
   );
