@@ -201,8 +201,8 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
                     <tr key={s.id} className="odd:bg-white even:bg-sky-50/40">
                       <td className="sticky left-0 border-b border-sky-100 bg-inherit px-3 py-2 font-medium text-slate-900">
                         <div className="flex flex-col">
-                          <span>{s.full_name}</span>
                           <span className="text-xs text-slate-500">{s.staff_code}</span>
+                          <span>{s.full_name}</span>
                         </div>
                       </td>
                       {timeSlots.map((t) => {
