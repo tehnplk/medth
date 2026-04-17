@@ -44,3 +44,6 @@ next-env.d.ts
 # playwright
 .playwright-cli
 
+# claude / agent artifacts
+.claude/
+

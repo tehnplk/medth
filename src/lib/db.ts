@@ -1,11 +1,13 @@
 import mysql from "mysql2/promise";
 
-let pool: mysql.Pool | null = null;
+const globalForMysql = globalThis as unknown as {
+  __mysqlPool?: mysql.Pool;
+};
 
 export function getPool() {
-  if (pool) return pool;
+  if (globalForMysql.__mysqlPool) return globalForMysql.__mysqlPool;
 
-  pool = mysql.createPool({
+  const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT ?? 3306),
     user: process.env.DB_USER,
@@ -15,10 +17,13 @@ export function getPool() {
     waitForConnections: true,
     queueLimit: 0,
     idleTimeout: 60_000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10_000,
     timezone: "+07:00",
     dateStrings: true,
   });
 
+  globalForMysql.__mysqlPool = pool;
   return pool;
 }
 

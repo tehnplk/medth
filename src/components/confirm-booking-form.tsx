@@ -47,7 +47,7 @@ export default function ConfirmBookingForm({
 
   return (
     <form
-      action="/confirm/submit"
+      action="/booking/confirm/submit"
       method="POST"
       onSubmit={handleSubmit}
       className="mt-4 rounded-2xl border border-sky-200 bg-white/90 p-4 shadow-[0_10px_24px_-18px_rgba(37,99,235,0.22)]"

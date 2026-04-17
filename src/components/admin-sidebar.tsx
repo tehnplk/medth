@@ -4,18 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CalendarClock,
+  CalendarCheck,
   ChevronRight,
-  LayoutGrid,
   MapPinned,
   UsersRound,
 } from "lucide-react";
 
 const menuItems = [
   {
-    href: "/admin",
-    label: "ภาพรวม",
-    description: "ภาพรวมระบบจอง",
-    icon: LayoutGrid,
+    href: "/admin/booked",
+    label: "รายการจอง",
+    description: "ตารางจองต่อสาขาและวันที่",
+    icon: CalendarCheck,
   },
   {
     href: "/admin/branches",

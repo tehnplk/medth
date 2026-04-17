@@ -125,7 +125,6 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                AND b.booking_date = ?
                AND b.time_slot_id = ?
                AND b.staff_id = s.id
-               AND b.booking_status <> 'cancelled'
              LIMIT 1
            ) AS is_booked,
            EXISTS(
@@ -152,15 +151,15 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
 
   const thaiDateLabel = toThaiDateLabel(dateParam);
   const stepLinks = [
-    "/",
+    "/booking",
     Number.isFinite(branchId) && branchId > 0
-      ? `/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
+      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0 && dateParam
-      ? `/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0
-      ? `/staff?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/staff?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
       : null,
     null,
   ];
@@ -170,7 +169,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
       <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <Link
-            href={`/time?branch=${branchId}&date=${dateParam}`}
+            href={`/booking/time?branch=${branchId}&date=${dateParam}`}
             className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
@@ -275,7 +274,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
               ) : (
                 <Link
                   key={staff.id}
-                  href={`/confirm?branch=${branchId}&date=${dateParam}&slot=${slotId}&staff=${staff.id}`}
+                  href={`/booking/confirm?branch=${branchId}&date=${dateParam}&slot=${slotId}&staff=${staff.id}`}
                   className="rounded-2xl border border-transparent bg-transparent"
                 >
                   {card}

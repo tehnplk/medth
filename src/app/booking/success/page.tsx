@@ -181,7 +181,7 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
         )}
 
         <Link
-          href="/"
+          href="/booking"
           className="mt-4 inline-flex w-full justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
         >
           กลับหน้าแรก

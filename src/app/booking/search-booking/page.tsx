@@ -11,8 +11,7 @@ type BookingSearchRow = {
   customer_name: string;
   customer_phone: string;
   booking_date: string | Date;
-  booking_status: "pending" | "confirmed" | "completed" | "cancelled";
-  confirm_status: "unconfirmed" | "confirmed";
+  booking_status: "pending" | "confirmed" | "completed";
   branch_name: string;
   staff_name: string;
   begin_time: string;
@@ -102,7 +101,6 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
           b.customer_phone,
           b.booking_date,
           b.booking_status,
-          b.confirm_status,
           br.name AS branch_name,
           s.full_name AS staff_name,
           ts.begin_time,
@@ -129,7 +127,7 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
       <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/95 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)]">
         <div className="flex items-center justify-between gap-3">
           <Link
-            href="/"
+            href="/booking"
             className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
           >
             กลับหน้าแรก
@@ -142,7 +140,7 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
             <Phone className="h-4 w-4 text-sky-600" />
             <span>ค้นหาด้วยเบอร์โทร</span>
           </p>
-          <form action="/search-booking" method="GET" className="mt-3 space-y-3">
+          <form action="/booking/search-booking" method="GET" className="mt-3 space-y-3">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-sky-900">
                 เบอร์โทร
@@ -207,17 +205,8 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`rounded-full px-2 py-1 text-[11px] font-semibold ${
-                        booking.booking_status === "cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-green-100 text-green-700"
-                      }`}
-                    >
+                    <span className="rounded-full bg-green-100 px-2 py-1 text-[11px] font-semibold text-green-700">
                       {booking.booking_status}
-                    </span>
-                    <span className="rounded-full bg-sky-100 px-2 py-1 text-[11px] font-semibold text-sky-700">
-                      {booking.confirm_status}
                     </span>
                   </div>
                 </div>

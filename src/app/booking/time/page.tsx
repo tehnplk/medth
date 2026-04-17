@@ -119,7 +119,6 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
           `SELECT time_slot_id, COUNT(*) AS booked_count
            FROM bookings
            WHERE branch_id = ?
-             AND booking_status <> 'cancelled'
              AND booking_date = ?
            GROUP BY time_slot_id`,
           [branchId, dateParam],
@@ -155,12 +154,12 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
 
   const thaiDateLabel = toThaiDateLabel(dateParam);
   const stepLinks = [
-    "/",
+    "/booking",
     Number.isFinite(branchId) && branchId > 0
-      ? `/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
+      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0 && dateParam
-      ? `/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
       : null,
     null,
     null,
@@ -171,7 +170,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
       <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
         <div className="flex items-center justify-between gap-3">
           <Link
-            href={`/date?branch=${branchId}`}
+            href={`/booking/date?branch=${branchId}`}
             className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
@@ -229,7 +228,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
               return (
                 <Link
                   key={slot.id}
-                  href={`/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
+                  href={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
                   className={`rounded-2xl border px-3 py-3 text-center text-sm font-semibold transition ${
                     isSelected
                       ? "border-sky-500 bg-sky-50 text-sky-900 shadow-[0_8px_20px_-14px_rgba(59,130,246,0.45)]"

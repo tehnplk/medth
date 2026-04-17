@@ -76,7 +76,7 @@ export async function POST(request: Request) {
     !phone
   ) {
     return NextResponse.redirect(
-      new URL(`/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}`, request.url),
+      new URL(`/booking/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}`, request.url),
     );
   }
 
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 
     if (lockResult !== 1) {
       return NextResponse.redirect(
-        new URL(`/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, request.url),
+        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, request.url),
       );
     }
 
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     const existingCode = existingRows[0]?.booking_code;
     if (existingCode) {
       return NextResponse.redirect(
-        new URL(`/success?booking_code=${encodeURIComponent(existingCode)}&branch=${branchId}`, request.url),
+        new URL(`/booking/success?booking_code=${encodeURIComponent(existingCode)}&branch=${branchId}`, request.url),
       );
     }
 
@@ -132,13 +132,12 @@ export async function POST(request: Request) {
           customer_name,
           customer_phone,
           line_id,
-          confirm_status,
           booking_date,
           time_slot_id,
           staff_id,
           notes,
           booking_status
-        ) VALUES (?, ?, ?, ?, NULL, 'confirmed', ?, ?, ?, NULL, 'confirmed')`,
+        ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, NULL, 'confirmed')`,
         [branchId, code, customerName, phone, bookingDate, slotId, staffId],
       );
     } catch (error) {
@@ -158,7 +157,7 @@ export async function POST(request: Request) {
         const duplicateCode = duplicateRows[0]?.booking_code;
         if (duplicateCode) {
           return NextResponse.redirect(
-            new URL(`/success?booking_code=${encodeURIComponent(duplicateCode)}&branch=${branchId}`, request.url),
+            new URL(`/booking/success?booking_code=${encodeURIComponent(duplicateCode)}&branch=${branchId}`, request.url),
           );
         }
       }
@@ -166,7 +165,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.redirect(
-      new URL(`/success?booking_code=${encodeURIComponent(code)}&branch=${branchId}`, request.url),
+      new URL(`/booking/success?booking_code=${encodeURIComponent(code)}&branch=${branchId}`, request.url),
     );
   } finally {
     try {
