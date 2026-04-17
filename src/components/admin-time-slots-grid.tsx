@@ -2,6 +2,7 @@
 
 import { startTransition, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
 
 type TimeSlotRow = {
@@ -69,17 +70,24 @@ export default function AdminTimeSlotsGrid({
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [editingRow, setEditingRow] = useState<TimeSlotRow | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<number>(
+    branches[0]?.id ?? 0,
+  );
   const [form, setForm] = useState<TimeSlotForm>({
     ...emptyForm,
     branch_id: branches[0] ? String(branches[0].id) : "",
   });
   const [open, setOpen] = useState(false);
 
+  const filteredRows = selectedBranchId
+    ? rows.filter((r) => r.branch_id === selectedBranchId)
+    : rows;
+
   function openCreateModal() {
     setEditingRow(null);
     setForm({
       ...emptyForm,
-      branch_id: branches[0] ? String(branches[0].id) : "",
+      branch_id: selectedBranchId ? String(selectedBranchId) : (branches[0] ? String(branches[0].id) : ""),
     });
     setError("");
     setOpen(true);
@@ -151,13 +159,17 @@ export default function AdminTimeSlotsGrid({
   }
 
   async function handleDelete(row: TimeSlotRow) {
-    if (
-      !window.confirm(
-        `ลบช่วงเวลา ${formatTime(row.begin_time)} - ${formatTime(row.end_time)} ใช่หรือไม่`,
-      )
-    ) {
-      return;
-    }
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: `ลบช่วงเวลา ${formatTime(row.begin_time)} - ${formatTime(row.end_time)} ใช่หรือไม่`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
 
     try {
       setError("");
@@ -191,6 +203,23 @@ export default function AdminTimeSlotsGrid({
         </button>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2">
+        {branches.map((branch) => (
+          <button
+            key={branch.id}
+            type="button"
+            onClick={() => setSelectedBranchId(branch.id)}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+              selectedBranchId === branch.id
+                ? "bg-sky-600 text-white"
+                : "border border-sky-200 text-sky-700 hover:bg-sky-50"
+            }`}
+          >
+            {branch.name}
+          </button>
+        ))}
+      </div>
+
       {error ? (
         <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -209,7 +238,7 @@ export default function AdminTimeSlotsGrid({
             </tr>
           </thead>
           <tbody className="divide-y divide-sky-100 bg-white">
-            {rows.map((row) => (
+            {filteredRows.map((row) => (
               <tr key={row.id} className="text-slate-700">
                 <td className="px-4 py-3 font-medium text-slate-900">{row.branch_name}</td>
                 <td className="px-4 py-3">{formatTime(row.begin_time)}</td>

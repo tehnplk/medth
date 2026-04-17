@@ -1,5 +1,6 @@
 import Link from "next/link";
 import BookingSteps from "@/components/booking-steps";
+import { ChevronLeft } from "lucide-react";
 import ConfirmBookingForm from "@/components/confirm-booking-form";
 import { query } from "@/lib/db";
 
@@ -148,8 +149,9 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}`}
-            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
+            className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
           >
+            <ChevronLeft className="h-3.5 w-3.5" />
             ย้อนกลับ
           </Link>
           <p className="text-sm font-semibold text-sky-800">ยืนยัน</p>

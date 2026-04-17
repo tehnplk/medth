@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
+import { Calendar, ChevronLeft, MapPin } from "lucide-react";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -20,6 +21,10 @@ type CountRow = {
 type BookingCountRow = {
   time_slot_id: number;
   booked_count: number;
+};
+
+type LeaveCountRow = {
+  total: number;
 };
 
 type TimeSlotRow = {
@@ -105,7 +110,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
 
   if (!hasDbError && branchName && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     try {
-      const [staffRows, bookingRows] = await Promise.all([
+      const [staffRows, bookingRows, leaveRows] = await Promise.all([
         query<CountRow[]>(
           "SELECT COUNT(*) AS total FROM staff WHERE branch_id = ? AND status = 'active'",
           [branchId],
@@ -119,9 +124,19 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
            GROUP BY time_slot_id`,
           [branchId, dateParam],
         ),
+        query<LeaveCountRow[]>(
+          `SELECT COUNT(*) AS total
+           FROM staff_leaves sl
+           JOIN staff s ON s.id = sl.staff_id
+           WHERE s.branch_id = ? AND s.status = 'active'
+             AND sl.leave_date = ?`,
+          [branchId, dateParam],
+        ),
       ]);
 
       const totalStaff = staffRows[0]?.total ?? 0;
+      const leaveCount = leaveRows[0]?.total ?? 0;
+      const availableStaff = Math.max(totalStaff - leaveCount, 0);
       const bookedCountMap = new Map(
         bookingRows.map((row) => [row.time_slot_id, Number(row.booked_count) || 0]),
       );
@@ -130,7 +145,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         const bookedCount = bookedCountMap.get(slot.id) ?? 0;
         return {
           ...slot,
-          available_staff_count: Math.max(totalStaff - bookedCount, 0),
+          available_staff_count: Math.max(availableStaff - bookedCount, 0),
         };
       });
     } catch {
@@ -139,10 +154,6 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   }
 
   const thaiDateLabel = toThaiDateLabel(dateParam);
-  const selectedSlot = slots.find((slot) => slot.id === selectedSlotId);
-  const slotLabel = selectedSlot
-    ? `${formatTime(selectedSlot.begin_time)} - ${formatTime(selectedSlot.end_time)}น.`
-    : "";
   const stepLinks = [
     "/",
     Number.isFinite(branchId) && branchId > 0
@@ -161,8 +172,9 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/date?branch=${branchId}`}
-            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
+            className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
           >
+            <ChevronLeft className="h-3.5 w-3.5" />
             ย้อนกลับ
           </Link>
           <p className="text-sm font-semibold text-sky-800">เลือกเวลา</p>
@@ -185,10 +197,16 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {!hasDbError && branchName ? (
-          <p className="mt-3 text-sm text-sky-900/80">
-            {branchName} | {thaiDateLabel}
-            {slotLabel ? ` | เวลา ${slotLabel}` : ""}
-          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              {branchName}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+              <Calendar className="h-3.5 w-3.5 shrink-0" />
+              {thaiDateLabel}
+            </span>
+          </div>
         ) : null}
 
         {dateParam ? null : (

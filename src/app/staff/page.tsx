@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
+import { Calendar, ChevronLeft, Clock, MapPin } from "lucide-react";
 import ThumbnailPlaceholder from "@/components/thumbnail-placeholder";
 
 type SearchParams = Promise<{
@@ -22,6 +23,7 @@ type StaffRow = {
   skill_note: string | null;
   status: "active" | "inactive";
   is_booked: number;
+  is_on_leave: number;
 };
 
 type TimeSlotRow = {
@@ -125,15 +127,23 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                AND b.staff_id = s.id
                AND b.booking_status <> 'cancelled'
              LIMIT 1
-           ) AS is_booked
+           ) AS is_booked,
+           EXISTS(
+             SELECT 1
+             FROM staff_leaves sl
+             WHERE sl.staff_id = s.id
+               AND sl.leave_date = ?
+             LIMIT 1
+           ) AS is_on_leave
          FROM staff s
          WHERE s.branch_id = ? AND s.status = 'active'
          ORDER BY s.staff_code ASC`,
-        [dateParam, slotId, branchId],
+        [dateParam, slotId, dateParam, branchId],
       );
       staffList = [
-        ...staffList.filter((staff) => staff.is_booked === 0),
-        ...staffList.filter((staff) => staff.is_booked === 1),
+        ...staffList.filter((s) => s.is_on_leave === 0 && s.is_booked === 0),
+        ...staffList.filter((s) => s.is_on_leave === 1),
+        ...staffList.filter((s) => s.is_on_leave === 0 && s.is_booked === 1),
       ];
     } catch {
       hasDbError = true;
@@ -161,8 +171,9 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
         <div className="flex items-center justify-between gap-3">
           <Link
             href={`/time?branch=${branchId}&date=${dateParam}`}
-            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
+            className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
           >
+            <ChevronLeft className="h-3.5 w-3.5" />
             ย้อนกลับ
           </Link>
           <p className="text-sm font-semibold text-sky-800">เลือกพนักงาน</p>
@@ -185,10 +196,22 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {!hasDbError && branchName ? (
-          <p className="mt-3 text-sm text-sky-900/80">
-            {branchName} | {thaiDateLabel}
-            {slotLabel ? ` | เวลา ${slotLabel}` : ""}
-          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              {branchName}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+              <Calendar className="h-3.5 w-3.5 shrink-0" />
+              {thaiDateLabel}
+            </span>
+            {slotLabel ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                {slotLabel}
+              </span>
+            ) : null}
+          </div>
         ) : null}
 
         {slotLabel ? null : (
@@ -207,14 +230,23 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
 
             {staffList.map((staff) => {
               const isBooked = staff.is_booked === 1;
+              const isOnLeave = staff.is_on_leave === 1;
+              const isDisabled = isBooked || isOnLeave;
               const card = (
                 <div
-                  className={`rounded-2xl border px-4 py-3 transition ${
-                    isBooked
-                      ? "border-sky-100 bg-sky-50/70 opacity-80"
+                  className={`relative overflow-hidden rounded-2xl border px-4 py-3 transition ${
+                    isDisabled
+                      ? "border-sky-100 bg-sky-50/70 opacity-75"
                       : "border-sky-200 bg-white hover:border-sky-300 hover:bg-sky-50"
                   }`}
                 >
+                  {isOnLeave && (
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <span className="rotate-[-28deg] rounded border-2 border-red-400 px-3 py-1 text-lg font-black tracking-widest text-red-400 opacity-60 select-none">
+                        ลา
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-start gap-4">
                     <ThumbnailPlaceholder kind="staff" label={staff.full_name} />
                     <div className="min-w-0 flex-1">
@@ -230,7 +262,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                       <p className="mt-1 text-xs text-sky-700/80">
                         โทร: {staff.phone ?? "-"}
                       </p>
-                      {isBooked ? (
+                      {isBooked && !isOnLeave ? (
                         <p className="mt-2 text-xs font-semibold text-sky-600">จองแล้ว</p>
                       ) : null}
                     </div>
@@ -238,7 +270,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                 </div>
               );
 
-              return isBooked ? (
+              return isDisabled ? (
                 <div key={staff.id}>{card}</div>
               ) : (
                 <Link

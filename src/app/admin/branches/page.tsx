@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import AdminBranchesGrid from "@/components/admin-branches-grid";
 import { query } from "@/lib/db";
 

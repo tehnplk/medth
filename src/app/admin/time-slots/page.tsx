@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import AdminTimeSlotsGrid from "@/components/admin-time-slots-grid";
 import { query } from "@/lib/db";
 

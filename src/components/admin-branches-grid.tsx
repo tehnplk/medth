@@ -2,6 +2,7 @@
 
 import { startTransition, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
 
 type BranchRow = {
@@ -125,7 +126,17 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
   }
 
   async function handleDelete(row: BranchRow) {
-    if (!window.confirm(`ลบสาขา "${row.name}" ใช่หรือไม่`)) return;
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: `ลบสาขา "${row.name}" ใช่หรือไม่`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
 
     try {
       setError("");

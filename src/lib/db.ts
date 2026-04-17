@@ -12,6 +12,11 @@ export function getPool() {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 0,
+    idleTimeout: 60_000,
+    timezone: "+07:00",
+    dateStrings: true,
   });
 
   return pool;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
+import { ChevronLeft, MapPin } from "lucide-react";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -19,6 +20,11 @@ type CountRow = {
 type BookingCountRow = {
   booking_date_key: string;
   booked_count: number;
+};
+
+type LeaveCountRow = {
+  leave_date_key: string;
+  leave_count: number;
 };
 
 type DateItem = {
@@ -127,7 +133,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
 
   if (!hasDbError && branchName && startDate && endDate) {
     try {
-      const [staffRows, slotRows, bookingRows] = await Promise.all([
+      const [staffRows, slotRows, bookingRows, leaveRows] = await Promise.all([
         query<CountRow[]>(
           "SELECT COUNT(*) AS total FROM staff WHERE branch_id = ? AND status = 'active'",
           [branchId],
@@ -144,18 +150,32 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
            GROUP BY DATE_FORMAT(booking_date, '%Y-%m-%d')`,
           [branchId, startDate, endDate],
         ),
+        query<LeaveCountRow[]>(
+          `SELECT DATE_FORMAT(sl.leave_date, '%Y-%m-%d') AS leave_date_key, COUNT(*) AS leave_count
+           FROM staff_leaves sl
+           JOIN staff s ON s.id = sl.staff_id
+           WHERE s.branch_id = ? AND s.status = 'active'
+             AND sl.leave_date BETWEEN ? AND ?
+           GROUP BY DATE_FORMAT(sl.leave_date, '%Y-%m-%d')`,
+          [branchId, startDate, endDate],
+        ),
       ]);
 
       const totalStaff = staffRows[0]?.total ?? 0;
       const totalSlots = slotRows[0]?.total ?? 0;
-      const maxQueuesPerDate = Math.max(totalStaff * totalSlots, 0);
       const bookedCountMap = new Map(
         bookingRows.map((row) => [row.booking_date_key, Number(row.booked_count) || 0]),
+      );
+      const leaveCountMap = new Map(
+        leaveRows.map((row) => [row.leave_date_key, Number(row.leave_count) || 0]),
       );
 
       dates.forEach((item) => {
         const bookedCount = bookedCountMap.get(item.key) ?? 0;
-        item.availableQueues = Math.max(maxQueuesPerDate - bookedCount, 0);
+        const leaveCount = leaveCountMap.get(item.key) ?? 0;
+        const availableStaff = Math.max(totalStaff - leaveCount, 0);
+        const maxQueues = availableStaff * totalSlots;
+        item.availableQueues = Math.max(maxQueues - bookedCount, 0);
       });
     } catch {
       hasDbError = true;
@@ -178,8 +198,9 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
         <div className="flex items-center justify-between gap-3">
           <Link
             href="/"
-            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
+            className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
           >
+            <ChevronLeft className="h-3.5 w-3.5" />
             ย้อนกลับ
           </Link>
           <p className="text-sm font-semibold text-sky-800">เลือกวันที่</p>
@@ -202,7 +223,12 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {!hasDbError && branchName ? (
-          <p className="mt-3 text-sm text-sky-900/80">สาขา: {branchName}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              {branchName}
+            </span>
+          </div>
         ) : null}
 
         <section className="mt-4 grid grid-cols-2 gap-3">
