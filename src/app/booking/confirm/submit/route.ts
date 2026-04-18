@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import { getPool, query } from "@/lib/db";
 
+declare global {
+  // eslint-disable-next-line no-var
+  var io: import("socket.io").Server | undefined;
+}
+
+function baseUrl(requestUrl: string): string {
+  return process.env.NEXTAUTH_URL ?? requestUrl;
+}
+
 type ExistsRow = { total: number };
 type BookingRow = { booking_code: string };
 type LockRow = { lock_result: number | null };
@@ -76,7 +85,7 @@ export async function POST(request: Request) {
     !phone
   ) {
     return NextResponse.redirect(
-      new URL(`/booking/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}`, request.url),
+      new URL(`/booking/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}`, baseUrl(request.url)),
     );
   }
 
@@ -99,7 +108,7 @@ export async function POST(request: Request) {
 
     if (lockResult !== 1) {
       return NextResponse.redirect(
-        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, request.url),
+        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, baseUrl(request.url)),
       );
     }
 
@@ -138,7 +147,7 @@ export async function POST(request: Request) {
 
     if (branchRows.length === 0 || staffRows.length === 0 || slotRows.length === 0) {
       return NextResponse.redirect(
-        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, request.url),
+        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, baseUrl(request.url)),
       );
     }
 
@@ -158,7 +167,7 @@ export async function POST(request: Request) {
     const existingCode = existingRows[0]?.booking_code;
     if (existingCode) {
       return NextResponse.redirect(
-        new URL(`/booking/success?booking_code=${encodeURIComponent(existingCode)}&branch=${branchId}`, request.url),
+        new URL(`/booking/success?booking_code=${encodeURIComponent(existingCode)}&branch=${branchId}`, baseUrl(request.url)),
       );
     }
 
@@ -198,15 +207,17 @@ export async function POST(request: Request) {
         const duplicateCode = duplicateRows[0]?.booking_code;
         if (duplicateCode) {
           return NextResponse.redirect(
-            new URL(`/booking/success?booking_code=${encodeURIComponent(duplicateCode)}&branch=${branchId}`, request.url),
+            new URL(`/booking/success?booking_code=${encodeURIComponent(duplicateCode)}&branch=${branchId}`, baseUrl(request.url)),
           );
         }
       }
       throw error;
     }
 
+    if (global.io) global.io.emit("refreshBookings");
+
     return NextResponse.redirect(
-      new URL(`/booking/success?booking_code=${encodeURIComponent(code)}&branch=${branchId}`, request.url),
+      new URL(`/booking/success?booking_code=${encodeURIComponent(code)}&branch=${branchId}`, baseUrl(request.url)),
     );
   } finally {
     try {
