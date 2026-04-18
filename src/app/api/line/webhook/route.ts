@@ -35,9 +35,57 @@ export async function POST(req: Request) {
       events.map(async (event) => {
         if (event.type === "message" && event.message.type === "text") {
           const text = event.message.text;
-          console.log(`Received message: ${text} from ${event.source.userId}`);
+          const lineId = event.source?.userId || "";
+          console.log(`Received message: ${text} from ${lineId}`);
 
-          // Reply with a confirmation
+          if (text.trim() === "จองคิว") {
+            const bookingUrl = `https://medthscphpl.online/booking?line_id=${encodeURIComponent(lineId)}`;
+
+            await client.replyMessage({
+              replyToken: event.replyToken,
+              messages: [
+                {
+                  type: "flex",
+                  altText: "กรุณากดที่ปุ่มด้านล่างเพื่อจองคิว",
+                  contents: {
+                    type: "bubble",
+                    body: {
+                      type: "box",
+                      layout: "vertical",
+                      spacing: "md",
+                      contents: [
+                        {
+                          type: "text",
+                          text: "กรุณากดที่ปุ่มด้านล่าง",
+                          wrap: true,
+                          size: "md",
+                        },
+                      ],
+                    },
+                    footer: {
+                      type: "box",
+                      layout: "vertical",
+                      spacing: "sm",
+                      contents: [
+                        {
+                          type: "button",
+                          style: "primary",
+                          action: {
+                            type: "uri",
+                            label: "ปุ่มกดจองคิว",
+                            uri: bookingUrl,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            });
+
+            return;
+          }
+
           await client.replyMessage({
             replyToken: event.replyToken,
             messages: [
