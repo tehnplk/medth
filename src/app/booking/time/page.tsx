@@ -207,29 +207,30 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         )}
 
         {dateParam ? (
-          <section className="grid grid-cols-2 gap-2 px-3">
+          <section className="grid grid-cols-2 gap-px bg-sky-100">
             {slots.length === 0 ? (
-              <p className="col-span-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+              <p className="col-span-2 bg-white px-4 py-3 text-sm text-sky-700">
                 ยังไม่มีช่วงเวลาในสาขานี้
               </p>
             ) : null}
 
-            {slots.map((slot) => {
+            {slots.map((slot, index) => {
               const isSelected = selectedSlotId === slot.id;
+              const isLastOdd = index === slots.length - 1 && slots.length % 2 === 1;
               const label = `${formatTime(slot.begin_time)} - ${formatTime(slot.end_time)}น.`;
               return (
                 <Link
                   key={slot.id}
                   href={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
-                  className={`rounded-2xl border px-3 py-3 text-center text-sm font-semibold transition ${
+                  className={`px-4 py-4 text-center text-sm font-semibold transition ${isLastOdd ? "col-span-2" : ""} ${
                     isSelected
-                      ? "border-sky-500 bg-sky-50 text-sky-900 shadow-[0_8px_20px_-14px_rgba(59,130,246,0.45)]"
-                      : "border-sky-200 bg-white text-sky-800 hover:border-sky-300"
+                      ? "bg-sky-50 text-sky-900"
+                      : "bg-white text-sky-800 active:bg-sky-50/70"
                   }`}
                 >
                   <span className="block">{label}</span>
                   <span
-                    className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${
+                    className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                       slot.available_staff_count === 0
                         ? "bg-red-100 text-red-700"
                         : "bg-green-100 text-green-700"

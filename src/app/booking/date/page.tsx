@@ -222,27 +222,27 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
           </div>
         ) : null}
 
-        <section className="grid grid-cols-2 gap-2 px-3">
+        <section className="grid grid-cols-2 gap-px bg-sky-100">
           {dates.map((item) => {
             const isSelected = item.key === dateParam;
             return (
               <Link
                 key={item.key}
                 href={`/booking/time?branch=${branchId}&date=${item.key}`}
-                className={`rounded-2xl border px-3 py-3 text-left transition ${
+                className={`px-4 py-3 text-left transition ${
                   isSelected
-                    ? "border-sky-500 bg-sky-50 shadow-[0_8px_20px_-14px_rgba(59,130,246,0.45)]"
-                    : "border-sky-200 bg-white hover:border-sky-300"
+                    ? "bg-sky-50"
+                    : "bg-white active:bg-sky-50/70"
                 }`}
               >
                 <span className="block text-sm font-semibold text-sky-950">
                   {item.dayLabel}
                 </span>
-                <span className="mt-1 block text-sm text-sky-800">
+                <span className="mt-0.5 block text-sm text-sky-800">
                   {item.dateLabel}
                 </span>
                 <span
-                  className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${
+                  className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                     item.availableQueues === 0
                       ? "bg-red-100 text-red-700"
                       : "bg-green-100 text-green-700"
