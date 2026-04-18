@@ -6,6 +6,7 @@ import { query } from "@/lib/db";
 import BookedDateInput from "@/components/booked-date-input";
 import BookingSlotButton from "@/components/booking-slot-button";
 import EmptySlotButton from "@/components/empty-slot-button";
+import SocketLiveRefresh from "@/components/socket-live-refresh";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -134,6 +135,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
 
   return (
     <div className="space-y-4">
+      <SocketLiveRefresh />
       <section className="rounded-[28px] border border-sky-200/80 bg-white/90 p-5 shadow-[0_16px_34px_-24px_rgba(37,99,235,0.35)] backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

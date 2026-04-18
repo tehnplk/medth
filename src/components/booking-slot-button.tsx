@@ -6,6 +6,7 @@ import { Check, CheckCheck, Circle, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import AdminModal from "./admin-modal";
 import { formatThaiDateShort } from "@/lib/thai-date";
+import { io } from "socket.io-client";
 
 type Status = "pending" | "confirmed" | "completed";
 
@@ -59,6 +60,7 @@ export default function BookingSlotButton({
       });
       if (!res.ok) throw new Error("update failed");
       setCurrent(next);
+      io().emit("bookingUpdate");
       router.refresh();
     } finally {
       setSaving(false);
@@ -99,6 +101,7 @@ export default function BookingSlotButton({
       });
       if (!res.ok) throw new Error("delete failed");
       setOpen(false);
+      io().emit("bookingUpdate");
       router.refresh();
     } finally {
       setSaving(false);
