@@ -1,4 +1,4 @@
-import { WebhookEvent, messagingApi } from "@line/bot-sdk";
+import { messagingApi } from "@line/bot-sdk";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     }
 
     const payload = JSON.parse(body);
-    const events: WebhookEvent[] = payload.events;
+    const events: any[] = payload.events;
 
     // Process all events
     await Promise.all(
