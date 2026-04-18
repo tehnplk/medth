@@ -173,9 +173,9 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
             </div>
           ) : null}
 
-          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-            <div className="bg-slate-900 px-6 py-6 text-white text-center">
-               <h3 className="text-2xl font-black">ข้อมูลการจอง</h3>
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-100 bg-slate-50 px-6 py-3">
+              <h3 className="text-sm font-semibold text-slate-700">ข้อมูลการจอง</h3>
             </div>
             
             <div className="p-6">

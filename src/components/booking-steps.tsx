@@ -9,7 +9,7 @@ const steps = ["สาขา", "วันที่", "เวลา", "พนั�
 
 export default function BookingSteps({ currentStep, stepLinks = [] }: BookingStepsProps) {
   return (
-    <div className="bg-white px-2 py-6 sm:px-6">
+    <div className="bg-white px-2 py-2 sm:px-6">
       <div className="flex items-center justify-between gap-2">
         {steps.map((label, index) => {
           const step = index + 1;
@@ -20,9 +20,9 @@ export default function BookingSteps({ currentStep, stepLinks = [] }: BookingSte
           const isClickable = !isCurrent && typeof href === "string" && href.length > 0;
 
           const content = (
-            <div className={`flex flex-col items-center gap-2 ${isClickable ? "group cursor-pointer" : ""}`}>
+            <div className={`flex flex-col items-center gap-1 ${isClickable ? "group cursor-pointer" : ""}`}>
               <div
-                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                   isDone
                     ? "bg-sky-600 text-white shadow-lg shadow-sky-200"
                     : isCurrent
@@ -30,10 +30,10 @@ export default function BookingSteps({ currentStep, stepLinks = [] }: BookingSte
                       : "bg-slate-50 text-slate-400 ring-1 ring-slate-200"
                 }`}
               >
-                {isDone ? <span className="text-base">✓</span> : <span>{step}</span>}
+                {isDone ? <span className="text-sm">✓</span> : <span>{step}</span>}
               </div>
               <span
-                className={`text-[11px] font-bold tracking-tight uppercase transition-colors duration-300 ${
+                className={`w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[11px] font-bold tracking-tight uppercase transition-colors duration-300 ${
                   isDone || isCurrent ? "text-sky-700" : "text-slate-400"
                 }`}
               >
@@ -57,7 +57,7 @@ export default function BookingSteps({ currentStep, stepLinks = [] }: BookingSte
                 )}
               </div>
               {!isLast && (
-                <div className="mx-2 mb-6 flex-1">
+                <div className="mx-2 mb-5 flex-1">
                   <div className={`h-[2px] w-full rounded-full transition-colors duration-500 ${isDone ? "bg-sky-500" : "bg-slate-100"}`} />
                 </div>
               )}
