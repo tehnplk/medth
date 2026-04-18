@@ -202,7 +202,7 @@ export async function DELETE(
       connection.release();
     }
 
-    // @ts-ignore
+    // @ts-expect-error global.io exists in background server
     if (global.io) global.io.emit("refreshBookings");
 
     return NextResponse.json({ success: true });

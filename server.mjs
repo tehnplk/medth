@@ -8,7 +8,7 @@ const handler = app.getRequestHandler();
 
 app.prepare().then(() => {
   const PORT = parseInt(process.env.PORT || "3001", 10);
-  const SOCKET_PORT = parseInt(process.env.SOCKET_PORT || "4001", 10);
+  const SOCKET_PORT = parseInt(process.env.SOCKET_PORT || "3002", 10);
 
   // Next.js Web App Server
   const httpServer = createServer(handler);
@@ -20,8 +20,9 @@ app.prepare().then(() => {
   const ioServer = createServer();
   const io = new Server(ioServer, {
     cors: {
-      origin: "*",
+      origin: true,
       methods: ["GET", "POST"],
+      credentials: true
     },
   });
   global.io = io;

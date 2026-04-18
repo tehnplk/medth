@@ -6,9 +6,13 @@ export default function BookingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto flex h-dvh max-w-sm flex-col overflow-hidden bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)]">
-      <SocketLiveRefresh />
-      {children}
+    <div className="min-h-screen w-full bg-slate-50/50">
+      <div className="mx-auto flex min-h-screen w-full flex-col bg-white shadow-2xl shadow-slate-200/50 ring-1 ring-slate-100 md:max-w-[700px] lg:max-w-[850px]">
+        <SocketLiveRefresh />
+        <main className="flex flex-1 flex-col">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

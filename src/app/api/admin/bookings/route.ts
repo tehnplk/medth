@@ -131,7 +131,7 @@ export async function POST(request: Request) {
             booking_status,
           ],
         );
-        // @ts-ignore
+        // @ts-expect-error global.io exists in background server
         if (global.io) global.io.emit("refreshBookings");
 
         return NextResponse.json({ ok: true, result, booking_code });

@@ -10,7 +10,7 @@ export default function SocketLiveRefresh() {
   useEffect(() => {
     const socketUrl =
       typeof window !== "undefined"
-        ? `${window.location.protocol}//${window.location.hostname}:4001`
+        ? `${window.location.protocol}//${window.location.hostname}:3002`
         : "";
     const socket = io(socketUrl);
 

@@ -36,7 +36,7 @@ export async function PATCH(
     return NextResponse.json({ error: "ไม่พบรายการจอง" }, { status: 404 });
   }
 
-  // @ts-ignore
+  // @ts-expect-error global.io exists in background server
   if (global.io) global.io.emit("refreshBookings");
 
   return NextResponse.json({ ok: true });
@@ -81,7 +81,7 @@ export async function DELETE(
     return NextResponse.json({ error: "ไม่พบรายการจอง" }, { status: 404 });
   }
 
-  // @ts-ignore
+  // @ts-expect-error global.io exists in background server
   if (global.io) global.io.emit("refreshBookings");
 
   return NextResponse.json({ ok: true });

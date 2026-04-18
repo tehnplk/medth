@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import QRCode from "qrcode";
 import { query } from "@/lib/db";
+import { Calendar, CheckCircle2, Clock, MapPin, User } from "lucide-react";
 import SuccessHistoryLock from "@/components/success-history-lock";
 import BookingTopBar from "@/components/booking-top-bar";
 
@@ -114,84 +115,113 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
 
   return (
     <>
-      <div className="flex-shrink-0 shadow-sm">
+      <div className="sticky top-0 z-30 flex-shrink-0 bg-white border-b border-slate-100 shadow-sm">
         <BookingTopBar title="จองสำเร็จ" />
       </div>
-      <div className="flex-1 overflow-y-auto py-4">
+
+      <div className="flex-1 overflow-y-auto bg-slate-50/50 px-4 py-8 sm:px-8">
         <SuccessHistoryLock />
+        
+        <div className="mx-auto max-w-lg">
+          {!receipt ? (
+            <div className="rounded-3xl border border-red-100 bg-red-50 p-6 text-center text-red-800">
+              <p className="font-bold text-lg">ไม่พบข้อมูลการจอง</p>
+              <p className="mt-1 text-base opacity-80">ตรวจสอบรหัสการจองอีกครั้ง หรือติดต่อเจ้าหน้าที่</p>
+            </div>
+          ) : (
+            <div className="relative group">
+              {/* Ticket Top Decoration */}
+              <div className="flex justify-center -mb-3 relative z-10">
+                <div className="h-6 w-12 rounded-full bg-slate-50/50 border border-slate-200" />
+              </div>
+              
+              <section className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white shadow-2xl shadow-slate-200/50">
+                <div className="bg-sky-600 px-6 py-10 text-center text-white sm:px-8">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                     <CheckCircle2 className="h-10 w-10 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-black text-white sm:text-3xl">จองสำเร็จ</h2>
+                </div>
+                
+                <div className="p-6 sm:p-8">
+                  <div className="mb-8 flex flex-col items-center">
+                    <p className="text-xs font-black uppercase tracking-[0.1em] text-slate-500 sm:text-sm">รหัสการจอง</p>
+                    <p className="mt-1 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl break-all">{receipt.booking_code}</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sky-600">
+                          <MapPin className="h-6 w-6" />
+                       </div>
+                       <div className="flex flex-col">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">สาขา</span>
+                          <span className="text-lg font-bold text-slate-900 leading-tight">{receipt.branch_name}</span>
+                       </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                      <div className="flex items-start gap-4">
+                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sky-600">
+                            <Calendar className="h-6 w-6" />
+                         </div>
+                         <div className="flex flex-col">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">วันที่</span>
+                            <span className="text-lg font-bold text-slate-900 leading-tight">{toThaiDateLabel(receipt.booking_date)}</span>
+                         </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4">
+                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sky-600">
+                            <Clock className="h-6 w-6" />
+                         </div>
+                         <div className="flex flex-col">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">เวลา</span>
+                            <span className="text-lg font-bold text-slate-900 leading-tight">{formatTime(receipt.begin_time)} - {formatTime(receipt.end_time)} น.</span>
+                         </div>
+                      </div>
+                    </div>
 
-        {!receipt ? (
-          <div className="mx-4 rounded-2xl border border-red-200 bg-red-50 p-4">
-            <p className="text-sm text-red-700">ไม่พบข้อมูลใบจอง</p>
+                    <div className="flex items-start gap-4">
+                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sky-600">
+                          <User className="h-6 w-6" />
+                       </div>
+                       <div className="flex flex-col">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">พนักงาน</span>
+                          <span className="text-lg font-bold text-slate-900 leading-tight">{receipt.staff_name}</span>
+                       </div>
+                    </div>
+                  </div>
+                  
+                  {/* QR Code Section */}
+                  <div className="mt-12 flex flex-col items-center justify-center border-t-2 border-dashed border-slate-100 pt-10">
+                    <div className="relative group/qr">
+                      <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-tr from-sky-500/10 to-teal-500/10 opacity-0 group-hover/qr:opacity-100 transition-opacity" />
+                      <Image
+                        src={qrUrl}
+                        alt="QR Code"
+                        width={220}
+                        height={220}
+                        unoptimized
+                        className="relative rounded-3xl border-8 border-white bg-white shadow-2xl transition-transform group-hover/qr:scale-105"
+                      />
+                    </div>
+                    <p className="mt-8 text-sm font-bold uppercase tracking-widest text-slate-500">แสดง QR Code เมื่อถึงโครงการ</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
+          <div className="mt-10 flex flex-col gap-4">
+            <Link
+              href="/booking"
+              className="flex w-full items-center justify-center rounded-2xl bg-slate-900 px-6 py-5 text-base font-bold text-white shadow-xl shadow-slate-200 transition-all hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              กลับหน้าหลัก
+            </Link>
           </div>
-        ) : (
-          <section className="mx-4 rounded-2xl border border-sky-200 bg-white p-4">
-            <p className="text-sm font-semibold text-sky-900">ใบจอง</p>
-
-            <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">รหัสจอง</span>
-                <span className="min-w-0 truncate font-semibold text-sky-900">
-                  {receipt.booking_code}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">ผู้จอง</span>
-                <span className="min-w-0 truncate font-medium text-sky-900">
-                  {receipt.customer_name}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">เบอร์โทร</span>
-                <span className="min-w-0 truncate font-medium text-sky-900">
-                  {receipt.customer_phone}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">สาขา</span>
-                <span className="min-w-0 truncate font-medium text-sky-900">
-                  {receipt.branch_name}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">วันที่</span>
-                <span className="min-w-0 truncate font-medium text-sky-900">
-                  {toThaiDateLabel(receipt.booking_date)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">เวลา</span>
-                <span className="min-w-0 truncate font-medium text-sky-900">
-                  {formatTime(receipt.begin_time)} - {formatTime(receipt.end_time)}น.
-                </span>
-              </div>
-              <div className="flex items-center gap-2 px-3 py-2 text-sm">
-                <span className="w-16 shrink-0 text-sky-700">พนักงาน</span>
-                <span className="min-w-0 truncate font-medium text-sky-900">
-                  {receipt.staff_name}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 flex justify-center">
-              <Image
-                src={qrUrl}
-                alt="QR Code ใบจอง"
-                width={220}
-                height={220}
-                unoptimized
-                className="rounded-xl border border-sky-200 bg-white p-2"
-              />
-            </div>
-          </section>
-        )}
-
-        <Link
-          href="/booking"
-          className="mx-4 mt-4 inline-flex w-full justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
-        >
-          กลับหน้าแรก
-        </Link>
+        </div>
       </div>
     </>
   );

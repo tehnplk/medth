@@ -2,7 +2,7 @@ import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
 import BookingTopBar from "@/components/booking-top-bar";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, ChevronRight, Clock, MapPin } from "lucide-react";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -170,79 +170,84 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
 
   return (
     <>
-      <div className="flex-shrink-0 shadow-sm">
+      <div className="sticky top-0 z-30 flex-shrink-0 bg-white border-b border-slate-100 shadow-sm">
         <BookingTopBar title="เลือกเวลา" backHref={`/booking/date?branch=${branchId}`} />
         <BookingSteps currentStep={3} stepLinks={stepLinks} />
       </div>
-      <div className="flex-1 overflow-y-auto py-3">
-        {hasDbError ? (
-          <p className="mx-4 mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
-          </p>
-        ) : null}
 
-        {!hasDbError && !branchName ? (
-          <p className="mx-4 mb-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
-            ไม่พบสาขาที่เลือก กรุณาเลือกสาขาใหม่
-          </p>
-        ) : null}
+      <div className="flex-1 overflow-y-auto bg-slate-50/50 px-4 py-6 sm:px-8">
+        <div className="mx-auto max-w-4xl">
+          {hasDbError ? (
+            <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-800 font-medium">
+              โหลดข้อมูลช่วงเวลาไม่สำเร็จ กรุณาลองใหมีกครั้ง
+            </div>
+          ) : null}
 
-        {!hasDbError && branchName ? (
-          <div className="mb-3 flex flex-wrap gap-2 px-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
-              {branchName}
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
-              <Calendar className="h-3.5 w-3.5 shrink-0" />
-              {thaiDateLabel}
-            </span>
-          </div>
-        ) : null}
+          {!hasDbError && branchName ? (
+            <div className="mb-6 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900 shadow-sm ring-1 ring-slate-200">
+                <MapPin className="h-4 w-4 text-sky-600" />
+                {branchName}
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-900 shadow-sm ring-1 ring-slate-200">
+                <Calendar className="h-4 w-4 text-emerald-600" />
+                {thaiDateLabel}
+              </span>
+            </div>
+          ) : null}
 
-        {dateParam ? null : (
-          <p className="mx-4 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
-            กรุณาเลือกวันที่ก่อน
-          </p>
-        )}
+          {!dateParam ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
+              <Calendar className="mb-4 h-12 w-12 opacity-20" />
+              <p className="font-medium">กรุณาเลือกวันที่ต้องการเข้ารับบริการก่อน</p>
+            </div>
+          ) : (
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {slots.length === 0 ? (
+                <div className="col-span-full py-20 text-center text-slate-500">
+                   <Clock className="mx-auto mb-4 h-10 w-10 opacity-20" />
+                   <p>ไม่มีช่วงเวลาเปิดให้บริการในวันที่เลือก</p>
+                </div>
+              ) : null}
 
-        {dateParam ? (
-          <section className="grid grid-cols-2 gap-px bg-sky-100">
-            {slots.length === 0 ? (
-              <p className="col-span-2 bg-white px-4 py-3 text-sm text-sky-700">
-                ยังไม่มีช่วงเวลาในสาขานี้
-              </p>
-            ) : null}
-
-            {slots.map((slot, index) => {
-              const isSelected = selectedSlotId === slot.id;
-              const isLastOdd = index === slots.length - 1 && slots.length % 2 === 1;
-              const label = `${formatTime(slot.begin_time)} - ${formatTime(slot.end_time)}น.`;
-              return (
-                <Link
-                  key={slot.id}
-                  href={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
-                  className={`px-4 py-4 text-center text-sm font-semibold transition ${isLastOdd ? "col-span-2" : ""} ${
-                    isSelected
-                      ? "bg-sky-50 text-sky-900"
-                      : "bg-white text-sky-800 active:bg-sky-50/70"
-                  }`}
-                >
-                  <span className="block">{label}</span>
-                  <span
-                    className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                      slot.available_staff_count === 0
-                        ? "bg-red-100 text-red-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
+              {slots.map((slot) => {
+                const isSelected = selectedSlotId === slot.id;
+                const isFull = slot.available_staff_count === 0;
+                const label = `${formatTime(slot.begin_time)} - ${formatTime(slot.end_time)}น.`;
+                
+                return (
+                  <Link
+                    key={slot.id}
+                    href={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
+                    className={`group relative flex items-center justify-between rounded-2xl border p-5 transition-all duration-300 ${
+                      isSelected
+                        ? "border-sky-500 bg-sky-50 shadow-lg shadow-sky-100 ring-2 ring-sky-500"
+                        : "border-slate-200 bg-white hover:border-sky-300 hover:shadow-md"
+                    } ${isFull ? "opacity-60 grayscale-[0.5]" : ""}`}
                   >
-                    ว่าง {slot.available_staff_count} คน
-                  </span>
-                </Link>
-              );
-            })}
-          </section>
-        ) : null}
+                    <div className="flex flex-col gap-1">
+                      <span className={`text-base font-black ${isSelected ? "text-sky-900" : "text-slate-900"}`}>
+                        {label}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-1.5 w-1.5 rounded-full ${isFull ? "bg-red-400" : "bg-emerald-500"}`} />
+                        <span className={`text-[11px] font-bold ${isSelected ? "text-sky-700" : "text-slate-500"}`}>
+                          {isFull ? "คิวเต็มแล้ว" : `ว่าง ${slot.available_staff_count} ท่าน`}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-300 ${
+                       isSelected ? "bg-sky-600 text-white" : "bg-slate-50 text-slate-400 group-hover:bg-sky-600 group-hover:text-white"
+                    }`}>
+                      <ChevronRight className="h-5 w-5" />
+                    </div>
+                  </Link>
+                );
+              })}
+            </section>
+          )}
+        </div>
       </div>
     </>
   );

@@ -2,6 +2,7 @@ import BookingSteps from "@/components/booking-steps";
 import BookingTopBar from "@/components/booking-top-bar";
 import ConfirmBookingForm from "@/components/confirm-booking-form";
 import { query } from "@/lib/db";
+import { Calendar, Clock, MapPin, User } from "lucide-react";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -112,7 +113,17 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
            LIMIT 1`,
           [dateParam, slotId, staffId, branchId],
         );
-        if (staffRows.length > 0 && staffRows[0].is_booked === 0) staffName = staffRows[0].full_name;
+        if (staffRows.length === 0 || staffRows[0].is_booked === 1) {
+          // If staff is not found or already booked, redirect back to staff list
+          const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}&error=booked`;
+          return (
+            <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
+              <meta httpEquiv="refresh" content={`0;url=${redirectUrl}`} />
+              <p className="text-slate-600 font-bold">พนักงานท่านนี้ถูกจองไปแล้ว กำลังพาท่านกลับไปเลือกใหม่...</p>
+            </div>
+          );
+        }
+        staffName = staffRows[0].full_name;
       }
     } catch {
       hasDbError = true;
@@ -144,47 +155,70 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
 
   return (
     <>
-      <div className="flex-shrink-0 shadow-sm">
-        <BookingTopBar title="ยืนยัน" backHref={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}`} />
+      <div className="sticky top-0 z-30 flex-shrink-0 bg-white border-b border-slate-100 shadow-sm">
+        <BookingTopBar title="ยืนยันการจอง" backHref={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}`} />
         <BookingSteps currentStep={5} stepLinks={stepLinks} />
       </div>
-      <div className="flex-1 overflow-y-auto py-4">
-        {hasDbError ? (
-          <p className="mx-4 mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
-          </p>
-        ) : null}
 
-        <section className="mx-4 rounded-2xl border border-sky-200 bg-white p-4">
-          <p className="text-sm font-semibold text-sky-900">ยืนยันการจอง</p>
-          <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
-            <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-sky-700">สาขา</span>
-              <span className="min-w-0 truncate font-medium text-sky-900">{branchName}</span>
+      <div className="flex-1 overflow-y-auto bg-slate-50/50 px-4 py-6 sm:px-8">
+        <div className="mx-auto max-w-2xl">
+          {hasDbError ? (
+            <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-800 font-medium">
+              โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
             </div>
-            <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-sky-700">วันที่</span>
-              <span className="min-w-0 truncate font-medium text-sky-900">{thaiDateLabel}</span>
+          ) : null}
+
+          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="bg-slate-900 px-6 py-6 text-white text-center">
+               <h3 className="text-2xl font-black">ข้อมูลการจอง</h3>
             </div>
-            <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-sky-700">เวลา</span>
-              <span className="min-w-0 truncate font-medium text-sky-900">{slotLabel}</span>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                    <MapPin className="h-3.5 w-3.5 text-sky-600" />
+                    สาขา
+                  </span>
+                  <p className="text-base font-bold text-slate-900">{branchName}</p>
+                </div>
+                
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                    <Calendar className="h-3.5 w-3.5 text-sky-600" />
+                    วันที่
+                  </span>
+                  <p className="text-base font-bold text-slate-900">{thaiDateLabel}</p>
+                </div>
+                
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                    <Clock className="h-3.5 w-3.5 text-sky-600" />
+                    ช่วงเวลา
+                  </span>
+                  <p className="text-base font-bold text-slate-900">{slotLabel}</p>
+                </div>
+                
+                <div className="flex flex-col gap-1">
+                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                    <User className="h-3.5 w-3.5 text-sky-600" />
+                    พนักงาน
+                  </span>
+                  <p className="text-base font-bold text-slate-900">{staffName}</p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="w-14 shrink-0 text-sky-700">พนักงาน</span>
-              <span className="min-w-0 truncate font-medium text-sky-900">{staffName}</span>
-            </div>
+          </section>
+
+          <div className="mt-8">
+            <ConfirmBookingForm
+              bookingReady={bookingReady}
+              branch={branchParam}
+              date={dateParam}
+              slot={slotParam}
+              staff={staffParam}
+            />
           </div>
-        </section>
-
-        <div className="mx-4">
-          <ConfirmBookingForm
-            bookingReady={bookingReady}
-            branch={branchParam}
-            date={dateParam}
-            slot={slotParam}
-            staff={staffParam}
-          />
         </div>
       </div>
     </>

@@ -36,12 +36,10 @@ export default function BranchDistance({ lat, lng }: Props) {
   );
 
   useEffect(() => {
-    if (lat === null || lng === null) {
-      setState({ kind: "no-coords" });
-      return;
-    }
+    if (lat === null || lng === null) return;
+
     if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setState({ kind: "unavailable" });
+      Promise.resolve().then(() => setState({ kind: "unavailable" }));
       return;
     }
     navigator.geolocation.getCurrentPosition(

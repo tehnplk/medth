@@ -9,61 +9,62 @@ const steps = ["สาขา", "วันที่", "เวลา", "พนั�
 
 export default function BookingSteps({ currentStep, stepLinks = [] }: BookingStepsProps) {
   return (
-    <div className="flex items-center border-b border-sky-100 bg-white px-4 pb-3 pt-1">
-      {steps.map((label, index) => {
-        const step = index + 1;
-        const isDone = step < currentStep;
-        const isCurrent = step === currentStep;
-        const isLast = index === steps.length - 1;
-        const href = stepLinks[index];
-        const isClickable = !isCurrent && typeof href === "string" && href.length > 0;
+    <div className="bg-white px-2 py-6 sm:px-6">
+      <div className="flex items-center justify-between gap-2">
+        {steps.map((label, index) => {
+          const step = index + 1;
+          const isDone = step < currentStep;
+          const isCurrent = step === currentStep;
+          const isLast = index === steps.length - 1;
+          const href = stepLinks[index];
+          const isClickable = !isCurrent && typeof href === "string" && href.length > 0;
 
-        const content = (
-          <div
-            className={`min-w-0 flex-1 text-center ${isClickable ? "cursor-pointer" : ""}`}
-          >
-            <span
-              className={`mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition ${
-                isDone
-                  ? "bg-sky-600 text-white"
-                  : isCurrent
-                    ? "border-2 border-sky-600 bg-white text-sky-700"
-                    : "border border-zinc-300 bg-zinc-100 text-zinc-400"
-              }`}
-            >
-              {isDone ? "✓" : step}
-            </span>
-            <span
-              className={`mt-1 block truncate text-[10px] ${
-                isDone || isCurrent ? "text-sky-700" : "text-zinc-400"
-              }`}
-            >
-              {label}
-            </span>
-          </div>
-        );
-
-        return (
-          <div key={label} className="flex min-w-0 flex-1 items-center">
-            {isClickable ? (
-              <Link
-                href={href}
-                aria-label={`ไปที่ขั้นตอน ${label}`}
-                className="block min-w-0 flex-1 outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-              >
-                {content}
-              </Link>
-            ) : (
-              content
-            )}
-            {isLast ? null : (
+          const content = (
+            <div className={`flex flex-col items-center gap-2 ${isClickable ? "group cursor-pointer" : ""}`}>
               <div
-                className={`mx-1 mt-[-12px] h-[2px] flex-1 ${isDone ? "bg-sky-300" : "bg-zinc-200"}`}
-              />
-            )}
-          </div>
-        );
-      })}
+                className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition-all duration-300 ${
+                  isDone
+                    ? "bg-sky-600 text-white shadow-lg shadow-sky-200"
+                    : isCurrent
+                      ? "ring-2 ring-sky-600 ring-offset-2 bg-sky-600 text-white shadow-lg shadow-sky-100"
+                      : "bg-slate-50 text-slate-400 ring-1 ring-slate-200"
+                }`}
+              >
+                {isDone ? <span className="text-base">✓</span> : <span>{step}</span>}
+              </div>
+              <span
+                className={`text-[11px] font-bold tracking-tight uppercase transition-colors duration-300 ${
+                  isDone || isCurrent ? "text-sky-700" : "text-slate-400"
+                }`}
+              >
+                {label}
+              </span>
+            </div>
+          );
+
+          return (
+            <div key={label} className="flex flex-1 items-center last:flex-none">
+              <div className="flex-1">
+                {isClickable ? (
+                  <Link
+                    href={href}
+                    className="block outline-none transition-transform active:scale-95"
+                  >
+                    {content}
+                  </Link>
+                ) : (
+                  content
+                )}
+              </div>
+              {!isLast && (
+                <div className="mx-2 mb-6 flex-1">
+                  <div className={`h-[2px] w-full rounded-full transition-colors duration-500 ${isDone ? "bg-sky-500" : "bg-slate-100"}`} />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
