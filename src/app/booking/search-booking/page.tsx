@@ -130,8 +130,8 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
       <div className="flex-shrink-0 shadow-sm">
         <BookingTopBar title="ค้นหาการจอง" backHref="/booking" />
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <section className="rounded-2xl border border-sky-200 bg-white p-4">
+      <div className="flex-1 overflow-y-auto py-4">
+        <section className="mx-4 rounded-2xl border border-sky-200 bg-white p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-sky-900">
             <Phone className="h-4 w-4 text-sky-600" />
             <span>ค้นหาด้วยเบอร์โทร</span>
@@ -162,19 +162,19 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
         </section>
 
         {hasDbError ? (
-          <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             โหลดข้อมูลการจองไม่สำเร็จ
           </p>
         ) : null}
 
         {hasSearch && !canSearch ? (
-          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+          <p className="mx-4 mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             กรุณากรอกเบอร์โทร 10 หลัก
           </p>
         ) : null}
 
         {canSearch ? (
-          <section className="mt-4 space-y-3">
+          <section className="mx-4 mt-4 space-y-3">
             <div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-4 py-3">
               <p className="text-sm text-sky-800">ผลการค้นหาเบอร์ {formatPhoneMask(phoneDigits)}</p>
               <p className="mt-1 text-xs text-sky-700">

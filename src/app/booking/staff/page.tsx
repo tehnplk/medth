@@ -172,21 +172,21 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
         <BookingTopBar title="เลือกพนักงาน" backHref={`/booking/time?branch=${branchId}&date=${dateParam}`} />
         <BookingSteps currentStep={4} stepLinks={stepLinks} />
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto">
         {hasDbError ? (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mx-4 mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
           </p>
         ) : null}
 
         {!hasDbError && !branchName ? (
-          <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+          <p className="mx-4 mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             ไม่พบข้อมูลที่เลือก กรุณาเริ่มใหม่
           </p>
         ) : null}
 
         {!hasDbError && branchName ? (
-          <div className="mb-3 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 px-4 py-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
               {branchName}
@@ -205,15 +205,15 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {slotLabel ? null : (
-          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+          <p className="mx-4 mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             กรุณาเลือกช่วงเวลาก่อน
           </p>
         )}
 
         {slotLabel ? (
-          <section className="mt-4 grid grid-cols-1 gap-3">
+          <section className="divide-y divide-sky-100">
             {staffList.length === 0 ? (
-              <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+              <p className="mx-4 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
                 ยังไม่มีพนักงานพร้อมให้บริการในสาขานี้
               </p>
             ) : null}
@@ -224,10 +224,10 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
               const isDisabled = isBooked || isOnLeave;
               const card = (
                 <div
-                  className={`relative overflow-hidden rounded-2xl border px-4 py-3 transition ${
+                  className={`relative overflow-hidden px-4 py-3 transition ${
                     isDisabled
-                      ? "border-sky-100 bg-sky-50/70 opacity-75"
-                      : "border-sky-200 bg-white hover:border-sky-300 hover:bg-sky-50"
+                      ? "bg-sky-50/70 opacity-75"
+                      : "bg-white active:bg-sky-50"
                   }`}
                 >
                   {isOnLeave && (
@@ -266,7 +266,6 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                 <Link
                   key={staff.id}
                   href={`/booking/confirm?branch=${branchId}&date=${dateParam}&slot=${slotId}&staff=${staff.id}`}
-                  className="rounded-2xl border border-transparent bg-transparent"
                 >
                   {card}
                 </Link>

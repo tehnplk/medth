@@ -117,15 +117,15 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
       <div className="flex-shrink-0 shadow-sm">
         <BookingTopBar title="จองสำเร็จ" />
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto py-4">
         <SuccessHistoryLock />
 
         {!receipt ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div className="mx-4 rounded-2xl border border-red-200 bg-red-50 p-4">
             <p className="text-sm text-red-700">ไม่พบข้อมูลใบจอง</p>
           </div>
         ) : (
-          <section className="rounded-2xl border border-sky-200 bg-white p-4">
+          <section className="mx-4 rounded-2xl border border-sky-200 bg-white p-4">
             <p className="text-sm font-semibold text-sky-900">ใบจอง</p>
 
             <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
@@ -188,7 +188,7 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
 
         <Link
           href="/booking"
-          className="mt-4 inline-flex w-full justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
+          className="mx-4 mt-4 inline-flex w-full justify-center rounded-xl bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
         >
           กลับหน้าแรก
         </Link>

@@ -148,14 +148,14 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
         <BookingTopBar title="ยืนยัน" backHref={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}`} />
         <BookingSteps currentStep={5} stepLinks={stepLinks} />
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto py-4">
         {hasDbError ? (
-          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mx-4 mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
           </p>
         ) : null}
 
-        <section className="rounded-2xl border border-sky-200 bg-white p-4">
+        <section className="mx-4 rounded-2xl border border-sky-200 bg-white p-4">
           <p className="text-sm font-semibold text-sky-900">ยืนยันการจอง</p>
           <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
             <div className="flex items-center gap-2 px-3 py-2 text-sm">
@@ -177,13 +177,15 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           </div>
         </section>
 
-        <ConfirmBookingForm
-          bookingReady={bookingReady}
-          branch={branchParam}
-          date={dateParam}
-          slot={slotParam}
-          staff={staffParam}
-        />
+        <div className="mx-4">
+          <ConfirmBookingForm
+            bookingReady={bookingReady}
+            branch={branchParam}
+            date={dateParam}
+            slot={slotParam}
+            staff={staffParam}
+          />
+        </div>
       </div>
     </>
   );
