@@ -47,6 +47,7 @@ export default function BookingSlotButton({
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [current, setCurrent] = useState<Status>(status);
+  const [pending, setPending] = useState<Status | null>(null);
 
   async function updateStatus(next: Status) {
     if (next === current || saving) return;
@@ -59,10 +60,28 @@ export default function BookingSlotButton({
       });
       if (!res.ok) throw new Error("update failed");
       setCurrent(next);
+      setPending(null);
       router.refresh();
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleStatusSelect(next: Status) {
+    if (saving) return;
+    setPending(next);
+  }
+
+  function handleConfirm() {
+    if (pending && pending !== current) {
+      updateStatus(pending);
+    }
+    setOpen(false);
+  }
+
+  function handleCancel() {
+    setPending(null);
+    setOpen(false);
   }
 
   async function deleteBooking() {
@@ -142,13 +161,13 @@ export default function BookingSlotButton({
             <div className="mt-2 grid grid-cols-3 gap-2">
               {statusOptions.map((opt) => {
                 const Icon = opt.icon;
-                const active = opt.key === current;
+                const active = opt.key === (pending ?? current);
                 return (
                   <button
                     key={opt.key}
                     type="button"
                     disabled={saving}
-                    onClick={() => updateStatus(opt.key)}
+                    onClick={() => handleStatusSelect(opt.key)}
                     className={`flex flex-col items-center gap-1 rounded-2xl border px-3 py-3 text-xs font-semibold transition disabled:opacity-60 ${
                       active
                         ? "border-sky-500 bg-sky-50 text-sky-800 shadow-[0_8px_20px_-14px_rgba(59,130,246,0.45)]"
@@ -177,15 +196,17 @@ export default function BookingSlotButton({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-full border border-sky-200 bg-white px-5 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50"
+                onClick={handleCancel}
+                disabled={saving}
+                className="rounded-full border border-sky-200 bg-white px-5 py-2 text-sm font-semibold text-sky-800 transition hover:bg-sky-50 disabled:opacity-60"
               >
                 ยกเลิก
               </button>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+                onClick={handleConfirm}
+                disabled={saving}
+                className="rounded-full bg-sky-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:opacity-60"
               >
                 ตกลง
               </button>
