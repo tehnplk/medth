@@ -9,6 +9,7 @@ type SearchParams = Promise<{
   date?: string | string[] | undefined;
   slot?: string | string[] | undefined;
   staff?: string | string[] | undefined;
+  line_id?: string | string[] | undefined;
 }>;
 
 type BranchRow = { id: number; name: string };
@@ -65,6 +66,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
   const dateParam = getQueryValue(searchParams.date);
   const slotParam = getQueryValue(searchParams.slot);
   const staffParam = getQueryValue(searchParams.staff);
+  const lineIdParam = getQueryValue(searchParams.line_id);
 
   const branchId = Number(branchParam);
   const slotId = Number(slotParam);
@@ -115,7 +117,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
         );
         if (staffRows.length === 0 || staffRows[0].is_booked === 1) {
           // If staff is not found or already booked, redirect back to staff list
-          const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}&error=booked`;
+          const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}&error=booked${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`;
           return (
             <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
               <meta httpEquiv="refresh" content={`0;url=${redirectUrl}`} />
@@ -140,23 +142,26 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
   const stepLinks = [
     "/booking",
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
+      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0 && dateParam
-      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/staff?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/staff?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/confirm?branch=${branchId}&date=${dateParam}&slot=${slotParam}${staffParam ? `&staff=${staffParam}` : ""}`
+      ? `/booking/confirm?branch=${branchId}&date=${dateParam}&slot=${slotParam}${staffParam ? `&staff=${staffParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
   ];
 
   return (
     <>
       <div className="sticky top-0 z-30 flex-shrink-0 bg-white border-b border-slate-100 shadow-sm">
-        <BookingTopBar title="ยืนยันการจอง" backHref={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}`} />
+        <BookingTopBar
+          title="ยืนยันการจอง"
+          backHref={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
+        />
         <BookingSteps currentStep={5} stepLinks={stepLinks} />
       </div>
 
@@ -217,6 +222,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
               date={dateParam}
               slot={slotParam}
               staff={staffParam}
+              lineId={lineIdParam}
             />
           </div>
         </div>

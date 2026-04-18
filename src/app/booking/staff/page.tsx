@@ -9,6 +9,7 @@ type SearchParams = Promise<{
   branch?: string | string[] | undefined;
   date?: string | string[] | undefined;
   slot?: string | string[] | undefined;
+  line_id?: string | string[] | undefined;
 }>;
 
 type BranchRow = {
@@ -82,6 +83,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
   const branchParam = getQueryValue(searchParams.branch);
   const dateParam = getQueryValue(searchParams.date);
   const slotParam = getQueryValue(searchParams.slot);
+  const lineIdParam = getQueryValue(searchParams.line_id);
 
   const branchId = Number(branchParam);
   const slotId = Number(slotParam);
@@ -150,13 +152,13 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
   const stepLinks = [
     "/booking",
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
+      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0 && dateParam
-      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/staff?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/staff?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     null,
   ];
@@ -165,7 +167,10 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
     <>
       <SocketLiveRefresh />
       <div className="sticky top-0 z-30 flex-shrink-0 bg-white border-b border-slate-100 shadow-sm">
-        <BookingTopBar title="เลือกพนักงาน" backHref={`/booking/time?branch=${branchId}&date=${dateParam}`} />
+        <BookingTopBar
+          title="เลือกพนักงาน"
+          backHref={`/booking/time?branch=${branchId}&date=${dateParam}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
+        />
         <BookingSteps currentStep={4} stepLinks={stepLinks} />
       </div>
 
@@ -207,6 +212,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
               branchId={branchId}
               dateParam={dateParam}
               slotId={slotId}
+              lineId={lineIdParam}
             />
           )}
         </div>

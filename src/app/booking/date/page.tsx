@@ -7,6 +7,7 @@ import { MapPin } from "lucide-react";
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
   date?: string | string[] | undefined;
+  line_id?: string | string[] | undefined;
 }>;
 
 type BranchRow = {
@@ -109,6 +110,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
   const searchParams = await props.searchParams;
   const branchParam = getQueryValue(searchParams.branch);
   const dateParam = getQueryValue(searchParams.date);
+  const lineIdParam = getQueryValue(searchParams.line_id);
   const branchId = Number(branchParam);
 
   let hasDbError = false;
@@ -187,7 +189,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
   const stepLinks = [
     "/booking",
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
+      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     null,
     null,
@@ -232,7 +234,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
               return (
                 <Link
                   key={item.key}
-                  href={`/booking/time?branch=${branchId}&date=${item.key}`}
+                  href={`/booking/time?branch=${branchId}&date=${item.key}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
                   className={`group relative flex flex-col items-center gap-1 rounded-2xl border p-4 text-center transition-all duration-300 ${
                     isSelected
                       ? "border-sky-500 bg-sky-50 shadow-lg shadow-sky-100 ring-2 ring-sky-500"

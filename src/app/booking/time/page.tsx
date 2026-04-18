@@ -8,6 +8,7 @@ type SearchParams = Promise<{
   branch?: string | string[] | undefined;
   date?: string | string[] | undefined;
   slot?: string | string[] | undefined;
+  line_id?: string | string[] | undefined;
 }>;
 
 type BranchRow = {
@@ -84,6 +85,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   const branchParam = getQueryValue(searchParams.branch);
   const dateParam = getQueryValue(searchParams.date);
   const slotParam = getQueryValue(searchParams.slot);
+  const lineIdParam = getQueryValue(searchParams.line_id);
   const branchId = Number(branchParam);
   const selectedSlotId = Number(slotParam);
 
@@ -159,10 +161,10 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   const stepLinks = [
     "/booking",
     Number.isFinite(branchId) && branchId > 0
-      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}`
+      ? `/booking/date?branch=${branchId}${dateParam ? `&date=${dateParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     Number.isFinite(branchId) && branchId > 0 && dateParam
-      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}`
+      ? `/booking/time?branch=${branchId}&date=${dateParam}${slotParam ? `&slot=${slotParam}` : ""}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`
       : null,
     null,
     null,
@@ -171,7 +173,10 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   return (
     <>
       <div className="sticky top-0 z-30 flex-shrink-0 bg-white border-b border-slate-100 shadow-sm">
-        <BookingTopBar title="เลือกเวลา" backHref={`/booking/date?branch=${branchId}`} />
+        <BookingTopBar
+          title="เลือกเวลา"
+          backHref={`/booking/date?branch=${branchId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
+        />
         <BookingSteps currentStep={3} stepLinks={stepLinks} />
       </div>
 
@@ -218,7 +223,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
                 return (
                   <Link
                     key={slot.id}
-                    href={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}`}
+                    href={`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slot.id}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
                     className={`group relative flex items-center justify-between rounded-2xl border p-5 transition-all duration-300 ${
                       isSelected
                         ? "border-sky-500 bg-sky-50 shadow-lg shadow-sky-100 ring-2 ring-sky-500"

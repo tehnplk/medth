@@ -15,6 +15,15 @@ type BranchRow = {
   coordinates: string | null;
 };
 
+type SearchParams = Promise<{
+  line_id?: string | string[] | undefined;
+}>;
+
+function getQueryValue(value: string | string[] | undefined): string {
+  if (Array.isArray(value)) return value[0] ?? "";
+  return value ?? "";
+}
+
 type Branch = {
   id: number;
   name: string;
@@ -34,7 +43,9 @@ function parseCoords(raw: string | null): { lat: number | null; lng: number | nu
   return { lat, lng };
 }
 
-export default async function Home() {
+export default async function Home(props: { searchParams: SearchParams }) {
+  const searchParams = await props.searchParams;
+  const lineIdParam = getQueryValue(searchParams.line_id);
   let branches: Branch[] = [];
   let hasDbError = false;
 
@@ -90,7 +101,7 @@ export default async function Home() {
             {branches.map((branch) => (
               <Link
                 key={branch.id}
-                href={`/booking/date?branch=${String(branch.id)}`}
+                href={`/booking/date?branch=${String(branch.id)}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
                 className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100 active:scale-[0.98]"
               >
                 <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100">

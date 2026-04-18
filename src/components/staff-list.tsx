@@ -21,9 +21,10 @@ type StaffListProps = {
   branchId: number;
   dateParam: string;
   slotId: number;
+  lineId: string;
 };
 
-export default function StaffList({ initialStaff, branchId, dateParam, slotId }: StaffListProps) {
+export default function StaffList({ initialStaff, branchId, dateParam, slotId, lineId }: StaffListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredStaff = useMemo(() => {
@@ -131,7 +132,7 @@ export default function StaffList({ initialStaff, branchId, dateParam, slotId }:
           ) : (
             <Link
               key={staff.id}
-              href={`/booking/confirm?branch=${branchId}&date=${dateParam}&slot=${slotId}&staff=${staff.id}`}
+              href={`/booking/confirm?branch=${branchId}&date=${dateParam}&slot=${slotId}&staff=${staff.id}${lineId ? `&line_id=${encodeURIComponent(lineId)}` : ""}`}
               className="block transition-transform active:scale-[0.98]"
             >
               {card}

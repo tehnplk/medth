@@ -8,6 +8,7 @@ type ConfirmBookingFormProps = {
   date: string;
   slot: string;
   staff: string;
+  lineId: string;
 };
 
 export default function ConfirmBookingForm({
@@ -16,6 +17,7 @@ export default function ConfirmBookingForm({
   date,
   slot,
   staff,
+  lineId,
 }: ConfirmBookingFormProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -56,6 +58,7 @@ export default function ConfirmBookingForm({
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="slot" value={slot} />
       <input type="hidden" name="staff" value={staff} />
+      <input type="hidden" name="line_id" value={lineId} />
 
       <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm transition-all duration-300 focus-within:border-sky-300 focus-within:shadow-xl focus-within:shadow-sky-100">
         <h3 className="mb-6 text-xl font-black text-slate-900">ผู้จอง</h3>

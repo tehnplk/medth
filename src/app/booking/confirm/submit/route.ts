@@ -68,6 +68,7 @@ export async function POST(request: Request) {
   const bookingDate = sanitize(formData.get("date"));
   const slotId = Number(sanitize(formData.get("slot")));
   const staffId = Number(sanitize(formData.get("staff")));
+  const lineId = sanitize(formData.get("line_id"));
   const firstName = sanitize(formData.get("first_name"));
   const lastName = sanitize(formData.get("last_name"));
   const phone = sanitize(formData.get("phone"));
@@ -84,8 +85,12 @@ export async function POST(request: Request) {
     !lastName ||
     !phone
   ) {
+    const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
     return NextResponse.redirect(
-      new URL(`/booking/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}`, baseUrl(request.url)),
+      new URL(
+        `/booking/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}${lineIdQuery}`,
+        baseUrl(request.url),
+      ),
     );
   }
 
@@ -107,8 +112,9 @@ export async function POST(request: Request) {
     const lockResult = lockRows[0]?.lock_result ?? 0;
 
     if (lockResult !== 1) {
+      const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
       return NextResponse.redirect(
-        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, baseUrl(request.url)),
+        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}${lineIdQuery}`, baseUrl(request.url)),
       );
     }
 
@@ -146,8 +152,9 @@ export async function POST(request: Request) {
     const slotRows = rawSlotRows as Array<{ id: number }>;
 
     if (branchRows.length === 0 || staffRows.length === 0 || slotRows.length === 0) {
+      const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
       return NextResponse.redirect(
-        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, baseUrl(request.url)),
+        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}${lineIdQuery}`, baseUrl(request.url)),
       );
     }
 
@@ -186,8 +193,8 @@ export async function POST(request: Request) {
           staff_id,
           notes,
           booking_status
-        ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, NULL, 'confirmed')`,
-        [branchId, code, customerName, phone, bookingDate, slotId, staffId],
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, 'confirmed')`,
+        [branchId, code, customerName, phone, lineId || null, bookingDate, slotId, staffId],
       );
     } catch (error) {
       const dbError = error as { code?: string; errno?: number };
