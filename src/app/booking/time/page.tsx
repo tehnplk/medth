@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
-import { Calendar, ChevronLeft, MapPin } from "lucide-react";
+import BookingTopBar from "@/components/booking-top-bar";
+import { Calendar, MapPin } from "lucide-react";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -168,37 +169,26 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   ];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            href={`/booking/date?branch=${branchId}`}
-            className="inline-flex items-center gap-1 rounded-full border border-sky-300 px-4 py-2 text-xs font-semibold text-sky-700"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-            ย้อนกลับ
-          </Link>
-          <p className="text-sm font-semibold text-sky-800">เลือกเวลา</p>
-        </div>
-
-        <div className="mt-3">
-          <BookingSteps currentStep={3} stepLinks={stepLinks} />
-        </div>
-
+    <>
+      <div className="flex-shrink-0 shadow-sm">
+        <BookingTopBar title="เลือกเวลา" backHref={`/booking/date?branch=${branchId}`} />
+        <BookingSteps currentStep={3} stepLinks={stepLinks} />
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4">
         {hasDbError ? (
-          <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
             โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
           </p>
         ) : null}
 
         {!hasDbError && !branchName ? (
-          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+          <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             ไม่พบสาขาที่เลือก กรุณาเลือกสาขาใหม่
           </p>
         ) : null}
 
         {!hasDbError && branchName ? (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
               {branchName}
@@ -211,13 +201,13 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         ) : null}
 
         {dateParam ? null : (
-          <p className="mt-3 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
+          <p className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
             กรุณาเลือกวันที่ก่อน
           </p>
         )}
 
         {dateParam ? (
-          <section className="mt-4 grid grid-cols-2 gap-3">
+          <section className="grid grid-cols-2 gap-3">
             {slots.length === 0 ? (
               <p className="col-span-2 rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700">
                 ยังไม่มีช่วงเวลาในสาขานี้
@@ -237,9 +227,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
                       : "border-sky-200 bg-white text-sky-800 hover:border-sky-300"
                   }`}
                 >
-                  <span className="block">
-                    {label}
-                  </span>
+                  <span className="block">{label}</span>
                   <span
                     className={`mt-2 inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${
                       slot.available_staff_count === 0
@@ -255,6 +243,6 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
           </section>
         ) : null}
       </div>
-    </main>
+    </>
   );
 }

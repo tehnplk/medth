@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
+import BookingTopBar from "@/components/booking-top-bar";
 import BranchDistance from "@/components/branch-distance";
 import ThumbnailPlaceholder from "@/components/thumbnail-placeholder";
+
 
 type BranchRow = {
   id: number;
@@ -58,18 +60,13 @@ export default async function Home() {
   const stepLinks = ["/booking", null, null, null, null];
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/90 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)] backdrop-blur">
-        <div className="flex items-center justify-between gap-3">
-          <div className="h-[26px] w-[72px]" aria-hidden />
-          <p className="text-sm font-semibold text-sky-800">เลือกสาขา</p>
-        </div>
-
-        <div className="mt-3">
-          <BookingSteps currentStep={1} stepLinks={stepLinks} />
-        </div>
-
-        <section className="mt-4 space-y-3">
+    <>
+      <div className="flex-shrink-0 shadow-sm">
+        <BookingTopBar title="เลือกสาขา" />
+        <BookingSteps currentStep={1} stepLinks={stepLinks} />
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="space-y-3">
           {hasDbError ? (
             <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               โหลดข้อมูลสาขาไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูล
@@ -105,8 +102,8 @@ export default async function Home() {
               </div>
             </Link>
           ))}
-        </section>
+        </div>
       </div>
-    </main>
+    </>
   );
 }
