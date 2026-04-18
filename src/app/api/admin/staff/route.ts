@@ -47,6 +47,8 @@ async function getStaffById(id: number) {
      FROM staff s
      JOIN branches b ON b.id = s.branch_id
      WHERE s.id = ?
+       AND s.is_deleted = 0
+       AND b.is_deleted = 0
      LIMIT 1`,
     [id],
   );
@@ -73,6 +75,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "กรุณากรอกรหัสและชื่อพนักงาน" }, { status: 400 });
     }
 
+    const [branchRows, duplicateRows] = await Promise.all([
+      query<Array<{ total: number }>>(
+        "SELECT COUNT(*) AS total FROM branches WHERE id = ? AND is_deleted = 0",
+        [branchId],
+      ),
+      query<Array<{ total: number }>>(
+        `SELECT COUNT(*) AS total
+         FROM staff
+         WHERE branch_id = ?
+           AND staff_code = ?
+           AND is_deleted = 0`,
+        [branchId, staffCode],
+      ),
+    ]);
+
+    if ((branchRows[0]?.total ?? 0) === 0) {
+      return NextResponse.json({ error: "ไม่พบสาขาที่เลือก" }, { status: 404 });
+    }
+
+    if ((duplicateRows[0]?.total ?? 0) > 0) {
+      return NextResponse.json(
+        { error: "รหัสพนักงานซ้ำในสาขาเดียวกัน" },
+        { status: 409 },
+      );
+    }
+
     const result = await query<mysql.ResultSetHeader>(
       `INSERT INTO staff (branch_id, staff_code, full_name, phone, photo_path, skill_note, status)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -82,13 +110,6 @@ export async function POST(request: Request) {
     const row = await getStaffById(result.insertId);
     return NextResponse.json({ row }, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && "code" in error && error.code === "ER_DUP_ENTRY") {
-      return NextResponse.json(
-        { error: "รหัสพนักงานซ้ำในสาขาเดียวกัน" },
-        { status: 409 },
-      );
-    }
-
     return NextResponse.json({ error: "ไม่สามารถเพิ่มพนักงานได้" }, { status: 500 });
   }
 }

@@ -110,6 +110,9 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
         JOIN staff s ON s.id = b.staff_id
         JOIN time_slots ts ON ts.id = b.time_slot_id
         WHERE REPLACE(REPLACE(REPLACE(REPLACE(b.customer_phone, '-', ''), ' ', ''), '(', ''), ')', '') = ?
+          AND b.is_deleted = 0
+          AND br.is_deleted = 0
+          AND s.is_deleted = 0
         ORDER BY b.booking_date DESC, ts.begin_time ASC, b.id DESC
         LIMIT 20`,
         [phoneDigits],

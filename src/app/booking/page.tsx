@@ -37,7 +37,7 @@ export default async function Home() {
 
   try {
     const rows = await query<BranchRow[]>(
-      "SELECT id, name, location_detail, opening_hours, coordinates FROM branches WHERE is_active = 1 ORDER BY id ASC",
+      "SELECT id, name, location_detail, opening_hours, coordinates FROM branches WHERE is_active = 1 AND is_deleted = 0 ORDER BY id ASC",
     );
 
     branches = rows.map((row) => {

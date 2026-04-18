@@ -29,6 +29,7 @@ async function getBranchById(id: number) {
     `SELECT id, name, location_detail, opening_hours, coordinates, is_active
      FROM branches
      WHERE id = ?
+       AND is_deleted = 0
      LIMIT 1`,
     [id],
   );

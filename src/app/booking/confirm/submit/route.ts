@@ -103,6 +103,45 @@ export async function POST(request: Request) {
       );
     }
 
+    const [rawBranchRows] = await connection.query(
+      `SELECT id
+       FROM branches
+       WHERE id = ?
+         AND is_active = 1
+         AND is_deleted = 0
+       LIMIT 1`,
+      [branchId],
+    );
+    const branchRows = rawBranchRows as Array<{ id: number }>;
+
+    const [rawStaffRows] = await connection.query(
+      `SELECT id
+       FROM staff
+       WHERE id = ?
+         AND branch_id = ?
+         AND status = 'active'
+         AND is_deleted = 0
+       LIMIT 1`,
+      [staffId, branchId],
+    );
+    const staffRows = rawStaffRows as Array<{ id: number }>;
+
+    const [rawSlotRows] = await connection.query(
+      `SELECT id
+       FROM time_slots
+       WHERE id = ?
+         AND branch_id = ?
+       LIMIT 1`,
+      [slotId, branchId],
+    );
+    const slotRows = rawSlotRows as Array<{ id: number }>;
+
+    if (branchRows.length === 0 || staffRows.length === 0 || slotRows.length === 0) {
+      return NextResponse.redirect(
+        new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}`, request.url),
+      );
+    }
+
     const [rawExistingRows] = await connection.query(
       `SELECT booking_code
        FROM bookings
@@ -110,6 +149,7 @@ export async function POST(request: Request) {
          AND booking_date = ?
          AND time_slot_id = ?
          AND staff_id = ?
+         AND is_deleted = 0
        LIMIT 1`,
       [branchId, bookingDate, slotId, staffId],
     );
@@ -150,6 +190,7 @@ export async function POST(request: Request) {
              AND booking_date = ?
              AND time_slot_id = ?
              AND staff_id = ?
+             AND is_deleted = 0
            LIMIT 1`,
           [branchId, bookingDate, slotId, staffId],
         );

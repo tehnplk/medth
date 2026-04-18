@@ -1,10 +1,7 @@
 import type mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
-
-type CountRow = {
-  total: number;
-};
+import { getPool, query } from "@/lib/db";
+import { getAuditUser } from "@/lib/audit-user";
 
 type StaffRow = {
   id: number;
@@ -56,6 +53,8 @@ async function getStaffById(id: number) {
      FROM staff s
      JOIN branches b ON b.id = s.branch_id
      WHERE s.id = ?
+       AND s.is_deleted = 0
+       AND b.is_deleted = 0
      LIMIT 1`,
     [id],
   );
@@ -92,12 +91,44 @@ export async function PATCH(
       return NextResponse.json({ error: "กรุณากรอกรหัสและชื่อพนักงาน" }, { status: 400 });
     }
 
-    await query<mysql.ResultSetHeader>(
+    const [branchRows, duplicateRows] = await Promise.all([
+      query<Array<{ total: number }>>(
+        "SELECT COUNT(*) AS total FROM branches WHERE id = ? AND is_deleted = 0",
+        [branchId],
+      ),
+      query<Array<{ total: number }>>(
+        `SELECT COUNT(*) AS total
+         FROM staff
+         WHERE branch_id = ?
+           AND staff_code = ?
+           AND is_deleted = 0
+           AND id <> ?`,
+        [branchId, staffCode, id],
+      ),
+    ]);
+
+    if ((branchRows[0]?.total ?? 0) === 0) {
+      return NextResponse.json({ error: "ไม่พบสาขาที่เลือก" }, { status: 404 });
+    }
+
+    if ((duplicateRows[0]?.total ?? 0) > 0) {
+      return NextResponse.json(
+        { error: "รหัสพนักงานซ้ำในสาขาเดียวกัน" },
+        { status: 409 },
+      );
+    }
+
+    const result = await query<mysql.ResultSetHeader>(
       `UPDATE staff
        SET branch_id = ?, staff_code = ?, full_name = ?, phone = ?, photo_path = ?, skill_note = ?, status = ?
-       WHERE id = ?`,
+       WHERE id = ?
+         AND is_deleted = 0`,
       [branchId, staffCode, fullName, phone, photoPath, skillNote, status, id],
     );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json({ error: "ไม่พบพนักงาน" }, { status: 404 });
+    }
 
     const row = await getStaffById(id);
     return NextResponse.json({ row });
@@ -125,19 +156,52 @@ export async function DELETE(
   }
 
   try {
-    const bookings = await query<CountRow[]>(
-      "SELECT COUNT(*) AS total FROM bookings WHERE staff_id = ?",
+    const staffRows = await query<Array<{ full_name: string }>>(
+      `SELECT full_name
+       FROM staff
+       WHERE id = ?
+         AND is_deleted = 0
+       LIMIT 1`,
       [id],
     );
 
-    if ((bookings[0]?.total ?? 0) > 0) {
-      return NextResponse.json(
-        { error: "ลบพนักงานนี้ไม่ได้ เพราะยังมีรายการจองอ้างอิงอยู่" },
-        { status: 409 },
-      );
+    const staff = staffRows[0];
+    if (!staff) {
+      return NextResponse.json({ error: "ไม่พบพนักงาน" }, { status: 404 });
     }
 
-    await query<mysql.ResultSetHeader>("DELETE FROM staff WHERE id = ?", [id]);
+    const deleteBy = await getAuditUser();
+    const connection = await getPool().getConnection();
+
+    try {
+      await connection.beginTransaction();
+      await connection.query(
+        `UPDATE bookings
+         SET is_deleted = 1,
+             delete_by = ?,
+             delete_date_time = NOW(),
+             delete_note = ?
+         WHERE staff_id = ?
+           AND is_deleted = 0`,
+        [deleteBy, `ลบพนักงาน: ${staff.full_name}`, id],
+      );
+      await connection.query(
+        `UPDATE staff
+         SET is_deleted = 1,
+             delete_by = ?,
+             delete_date_time = NOW()
+         WHERE id = ?
+           AND is_deleted = 0`,
+        [deleteBy, id],
+      );
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "ไม่สามารถลบพนักงานได้" }, { status: 500 });

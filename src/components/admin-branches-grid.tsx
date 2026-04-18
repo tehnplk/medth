@@ -22,6 +22,10 @@ type BranchForm = {
   is_active: string;
 };
 
+type DeleteSummary = {
+  futureBookingCount: number;
+};
+
 const emptyForm: BranchForm = {
   name: "",
   location_detail: "",
@@ -126,9 +130,24 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
   }
 
   async function handleDelete(row: BranchRow) {
+    let summary: DeleteSummary | null = null;
+
+    try {
+      summary = await requestJson<DeleteSummary>(`/api/admin/branches/${row.id}/delete-summary`);
+    } catch {
+      summary = null;
+    }
+
+    const deleteText =
+      summary === null
+        ? `ลบสาขา "${row.name}" ใช่หรือไม่`
+        : summary.futureBookingCount > 0
+          ? `ลบสาขา "${row.name}" ใช่หรือไม่\nสาขานี้มีการจองค้างอยู่ ${summary.futureBookingCount} การจอง`
+          : `ลบสาขา "${row.name}" ใช่หรือไม่\nตั้งแต่วันนี้เป็นต้นไป ไม่มีการจองสาขานี้`;
+
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
-      text: `ลบสาขา "${row.name}" ใช่หรือไม่`,
+      text: deleteText,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",

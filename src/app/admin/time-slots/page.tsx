@@ -29,9 +29,10 @@ export default async function AdminTimeSlotsPage() {
          b.name AS branch_name
        FROM time_slots ts
        JOIN branches b ON b.id = ts.branch_id
+       WHERE b.is_deleted = 0
        ORDER BY b.id ASC, ts.begin_time ASC`,
     ),
-    query<BranchOption[]>("SELECT id, name FROM branches ORDER BY id ASC"),
+    query<BranchOption[]>("SELECT id, name FROM branches WHERE is_deleted = 0 ORDER BY id ASC"),
   ]);
 
   return <AdminTimeSlotsGrid initialRows={slots} branches={branches} />;

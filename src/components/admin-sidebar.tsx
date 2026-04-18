@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   CalendarClock,
   CalendarCheck,
   ChevronRight,
+  LogOut,
   MapPinned,
   UsersRound,
 } from "lucide-react";
@@ -37,7 +39,11 @@ const menuItems = [
   },
 ];
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  currentUserName?: string | null;
+};
+
+export default function AdminSidebar({ currentUserName }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -82,6 +88,23 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
+
+      <div className="mt-4 border-t border-sky-100 pt-4">
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="flex w-full items-center gap-3 rounded-2xl border border-sky-100 bg-white px-3 py-3 text-left text-slate-700 transition hover:border-sky-300 hover:bg-sky-50"
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-700">
+            <LogOut className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{currentUserName ?? "Admin"}</p>
+            <p className="truncate text-xs text-slate-500">Logout</p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-slate-400" />
+        </button>
+      </div>
     </aside>
   );
 }

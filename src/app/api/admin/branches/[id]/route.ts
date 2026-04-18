@@ -1,10 +1,7 @@
 import type mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db";
-
-type CountRow = {
-  total: number;
-};
+import { getPool, query } from "@/lib/db";
+import { getAuditUser } from "@/lib/audit-user";
 
 type BranchRow = {
   id: number;
@@ -38,6 +35,7 @@ async function getBranchById(id: number) {
     `SELECT id, name, location_detail, opening_hours, coordinates, is_active
      FROM branches
      WHERE id = ?
+       AND is_deleted = 0
      LIMIT 1`,
     [id],
   );
@@ -68,12 +66,17 @@ export async function PATCH(
       return NextResponse.json({ error: "กรุณากรอกชื่อสาขา" }, { status: 400 });
     }
 
-    await query<mysql.ResultSetHeader>(
+    const result = await query<mysql.ResultSetHeader>(
       `UPDATE branches
        SET name = ?, location_detail = ?, opening_hours = ?, coordinates = ?, is_active = ?
-       WHERE id = ?`,
+       WHERE id = ?
+         AND is_deleted = 0`,
       [name, locationDetail, openingHours, coordinates, isActive, id],
     );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json({ error: "ไม่พบสาขา" }, { status: 404 });
+    }
 
     const row = await getBranchById(id);
     return NextResponse.json({ row });
@@ -94,23 +97,51 @@ export async function DELETE(
   }
 
   try {
-    const [staffRows, slotRows, bookingRows] = await Promise.all([
-      query<CountRow[]>("SELECT COUNT(*) AS total FROM staff WHERE branch_id = ?", [id]),
-      query<CountRow[]>("SELECT COUNT(*) AS total FROM time_slots WHERE branch_id = ?", [id]),
-      query<CountRow[]>("SELECT COUNT(*) AS total FROM bookings WHERE branch_id = ?", [id]),
-    ]);
+    const branchRows = await query<Array<{ name: string }>>(
+      `SELECT name
+       FROM branches
+       WHERE id = ?
+         AND is_deleted = 0
+       LIMIT 1`,
+      [id],
+    );
 
-    const relatedCount =
-      (staffRows[0]?.total ?? 0) + (slotRows[0]?.total ?? 0) + (bookingRows[0]?.total ?? 0);
-
-    if (relatedCount > 0) {
-      return NextResponse.json(
-        { error: "ลบสาขานี้ไม่ได้ เพราะยังมีพนักงาน เวลาจอง หรือรายการจองอยู่" },
-        { status: 409 },
-      );
+    const branch = branchRows[0];
+    if (!branch) {
+      return NextResponse.json({ error: "ไม่พบสาขา" }, { status: 404 });
     }
 
-    await query<mysql.ResultSetHeader>("DELETE FROM branches WHERE id = ?", [id]);
+    const deleteBy = await getAuditUser();
+    const connection = await getPool().getConnection();
+
+    try {
+      await connection.beginTransaction();
+      await connection.query(
+        `UPDATE bookings
+         SET is_deleted = 1,
+             delete_by = ?,
+             delete_date_time = NOW(),
+             delete_note = ?
+         WHERE branch_id = ?
+           AND is_deleted = 0`,
+        [deleteBy, `ลบสาขา: ${branch.name}`, id],
+      );
+      await connection.query(
+        `UPDATE branches
+         SET is_deleted = 1,
+             delete_by = ?,
+             delete_date_time = NOW()
+         WHERE id = ?
+           AND is_deleted = 0`,
+        [deleteBy, id],
+      );
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "ไม่สามารถลบสาขาได้" }, { status: 500 });

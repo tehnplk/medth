@@ -37,6 +37,7 @@ async function getTimeSlotById(id: number) {
      FROM time_slots ts
      JOIN branches b ON b.id = ts.branch_id
      WHERE ts.id = ?
+       AND b.is_deleted = 0
      LIMIT 1`,
     [id],
   );
@@ -58,6 +59,15 @@ export async function POST(request: Request) {
 
     if (beginTime >= endTime) {
       return NextResponse.json({ error: "เวลาเริ่มต้องน้อยกว่าเวลาสิ้นสุด" }, { status: 400 });
+    }
+
+    const branchRows = await query<Array<{ total: number }>>(
+      "SELECT COUNT(*) AS total FROM branches WHERE id = ? AND is_deleted = 0",
+      [branchId],
+    );
+
+    if ((branchRows[0]?.total ?? 0) === 0) {
+      return NextResponse.json({ error: "ไม่พบสาขาที่เลือก" }, { status: 404 });
     }
 
     const result = await query<mysql.ResultSetHeader>(

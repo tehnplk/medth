@@ -93,7 +93,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
   if (Number.isFinite(branchId) && branchId > 0) {
     try {
       const branchRows = await query<BranchRow[]>(
-        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 LIMIT 1",
+        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
         [branchId],
       );
       if (branchRows.length > 0) {
@@ -125,6 +125,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
                AND b.booking_date = ?
                AND b.time_slot_id = ?
                AND b.staff_id = s.id
+               AND b.is_deleted = 0
              LIMIT 1
            ) AS is_booked,
            EXISTS(
@@ -135,7 +136,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
              LIMIT 1
            ) AS is_on_leave
          FROM staff s
-         WHERE s.branch_id = ? AND s.status = 'active'
+         WHERE s.branch_id = ? AND s.status = 'active' AND s.is_deleted = 0
          ORDER BY s.staff_code ASC`,
         [dateParam, slotId, dateParam, branchId],
       );

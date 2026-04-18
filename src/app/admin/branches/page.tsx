@@ -16,6 +16,7 @@ export default async function AdminBranchesPage() {
   const branches = await query<BranchRow[]>(
     `SELECT id, name, location_detail, opening_hours, coordinates, is_active
      FROM branches
+     WHERE is_deleted = 0
      ORDER BY id ASC`,
   );
 

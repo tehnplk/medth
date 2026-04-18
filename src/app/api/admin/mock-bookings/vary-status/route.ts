@@ -14,7 +14,8 @@ export async function POST(request: Request) {
           WHEN 1 THEN 'confirmed'
           ELSE 'completed'
         END
-      WHERE booking_date = ?`,
+      WHERE booking_date = ?
+        AND is_deleted = 0`,
     [date],
   );
   return NextResponse.json({ ok: true, result });

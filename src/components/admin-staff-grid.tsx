@@ -46,6 +46,10 @@ type LeaveForm = {
   reason: string;
 };
 
+type DeleteSummary = {
+  futureBookingCount: number;
+};
+
 const leaveTypeLabels: Record<LeaveRow["leave_type"], string> = {
   sick: "ลาป่วย",
   personal: "ลากิจ",
@@ -320,9 +324,24 @@ export default function AdminStaffGrid({
   }
 
   async function handleDelete(row: StaffRow) {
+    let summary: DeleteSummary | null = null;
+
+    try {
+      summary = await requestJson<DeleteSummary>(`/api/admin/staff/${row.id}/delete-summary`);
+    } catch {
+      summary = null;
+    }
+
+    const deleteText =
+      summary === null
+        ? `ลบพนักงาน "${row.full_name}" ใช่หรือไม่`
+        : summary.futureBookingCount > 0
+          ? `ลบพนักงาน "${row.full_name}" ใช่หรือไม่\nพนักงานท่านนี้มีการจองค้างอยู่ ${summary.futureBookingCount} การจอง`
+          : `ลบพนักงาน "${row.full_name}" ใช่หรือไม่\nตั้งแต่วันนี้เป็นต้นไป ไม่มีการจองพนักงานคนนี้`;
+
     const result = await Swal.fire({
       title: "ยืนยันการลบ",
-      text: `ลบพนักงาน "${row.full_name}" ใช่หรือไม่`,
+      text: deleteText,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -425,8 +444,10 @@ export default function AdminStaffGrid({
             {filteredRows.map((row) => (
               <tr key={row.id} className="align-top text-slate-700">
                 <td className="px-4 py-3">
-                  <p className="font-medium text-slate-900">{row.full_name}</p>
-                  <p className="mt-1 text-xs text-slate-500">รหัส {row.staff_code}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {row.staff_code}
+                  </p>
+                  <p className="mt-1 font-medium text-slate-900">{row.full_name}</p>
                 </td>
                 <td className="px-4 py-3">{row.branch_name}</td>
                 <td className="px-4 py-3">{row.phone ?? "-"}</td>

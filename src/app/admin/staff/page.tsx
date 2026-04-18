@@ -35,9 +35,11 @@ export default async function AdminStaffPage() {
          b.name AS branch_name
        FROM staff s
        JOIN branches b ON b.id = s.branch_id
+       WHERE s.is_deleted = 0
+         AND b.is_deleted = 0
        ORDER BY b.id ASC, s.staff_code ASC`,
     ),
-    query<BranchOption[]>("SELECT id, name FROM branches ORDER BY id ASC"),
+    query<BranchOption[]>("SELECT id, name FROM branches WHERE is_deleted = 0 ORDER BY id ASC"),
   ]);
 
   return <AdminStaffGrid initialRows={staffList} branches={branches} />;

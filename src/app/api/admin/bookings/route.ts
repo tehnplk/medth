@@ -74,6 +74,37 @@ export async function POST(request: Request) {
   }
 
   try {
+    const [branchRows, staffRows, slotRows] = await Promise.all([
+      query<ExistsRow[]>(
+        "SELECT COUNT(*) AS total FROM branches WHERE id = ? AND is_deleted = 0",
+        [branch_id],
+      ),
+      query<ExistsRow[]>(
+        `SELECT COUNT(*) AS total
+         FROM staff
+         WHERE id = ?
+           AND branch_id = ?
+           AND is_deleted = 0`,
+        [staff_id, branch_id],
+      ),
+      query<ExistsRow[]>(
+        "SELECT COUNT(*) AS total FROM time_slots WHERE id = ? AND branch_id = ?",
+        [time_slot_id, branch_id],
+      ),
+    ]);
+
+    if ((branchRows[0]?.total ?? 0) === 0) {
+      return NextResponse.json({ error: "branch not found" }, { status: 404 });
+    }
+
+    if ((staffRows[0]?.total ?? 0) === 0) {
+      return NextResponse.json({ error: "staff not found" }, { status: 404 });
+    }
+
+    if ((slotRows[0]?.total ?? 0) === 0) {
+      return NextResponse.json({ error: "time slot not found" }, { status: 404 });
+    }
+
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const booking_code = await generateBookingCode(bookingCodePrefix(booking_date), branch_id);
 
@@ -115,6 +146,7 @@ export async function POST(request: Request) {
               AND booking_date = ?
               AND time_slot_id = ?
               AND staff_id = ?
+              AND is_deleted = 0
             LIMIT 1`,
           [branch_id, booking_date, time_slot_id, staff_id],
         );

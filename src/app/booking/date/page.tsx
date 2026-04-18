@@ -116,7 +116,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
   if (Number.isFinite(branchId) && branchId > 0) {
     try {
       const branches = await query<BranchRow[]>(
-        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 LIMIT 1",
+        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
         [branchId],
       );
       if (branches.length > 0) {
@@ -135,7 +135,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
     try {
       const [staffRows, slotRows, bookingRows, leaveRows] = await Promise.all([
         query<CountRow[]>(
-          "SELECT COUNT(*) AS total FROM staff WHERE branch_id = ? AND status = 'active'",
+          "SELECT COUNT(*) AS total FROM staff WHERE branch_id = ? AND status = 'active' AND is_deleted = 0",
           [branchId],
         ),
         query<CountRow[]>("SELECT COUNT(*) AS total FROM time_slots WHERE branch_id = ?", [
@@ -146,6 +146,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
            FROM bookings
            WHERE branch_id = ?
              AND booking_date BETWEEN ? AND ?
+             AND is_deleted = 0
            GROUP BY DATE_FORMAT(booking_date, '%Y-%m-%d')`,
           [branchId, startDate, endDate],
         ),
@@ -154,6 +155,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
            FROM staff_leaves sl
            JOIN staff s ON s.id = sl.staff_id
            WHERE s.branch_id = ? AND s.status = 'active'
+             AND s.is_deleted = 0
              AND sl.leave_date BETWEEN ? AND ?
            GROUP BY DATE_FORMAT(sl.leave_date, '%Y-%m-%d')`,
           [branchId, startDate, endDate],

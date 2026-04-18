@@ -36,13 +36,18 @@ export async function POST(request: Request) {
         s.id,
         'confirmed'
       FROM staff s
+      JOIN branches br ON br.id = s.branch_id
       JOIN time_slots t ON t.branch_id = s.branch_id
       LEFT JOIN bookings b
         ON b.branch_id = s.branch_id
        AND b.booking_date = ?
        AND b.time_slot_id = t.id
        AND b.staff_id = s.id
-      WHERE s.status = 'active' AND b.id IS NULL${branchFilter}`,
+       AND b.is_deleted = 0
+      WHERE s.status = 'active'
+        AND s.is_deleted = 0
+        AND br.is_deleted = 0
+        AND b.id IS NULL${branchFilter}`,
     [...params.slice(0, 2), date, ...(branchParam ? [Number(branchParam)] : [])],
   );
 

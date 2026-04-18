@@ -54,7 +54,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
   const dateParam = /^\d{4}-\d{2}-\d{2}$/.test(dateParamRaw) ? dateParamRaw : bangkokTodayIso();
 
   const branches = await query<BranchRow[]>(
-    "SELECT id, name FROM branches WHERE is_active = 1 ORDER BY id ASC",
+    "SELECT id, name FROM branches WHERE is_active = 1 AND is_deleted = 0 ORDER BY id ASC",
   );
 
   const parsedBranch = Number(branchParam);
@@ -77,7 +77,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
       query<StaffRow[]>(
         `SELECT id, full_name, staff_code
            FROM staff
-           WHERE branch_id = ? AND status = 'active'
+           WHERE branch_id = ? AND status = 'active' AND is_deleted = 0
            ORDER BY staff_code ASC`,
         [branchId],
       ),
@@ -85,14 +85,16 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
         `SELECT id, booking_code, staff_id, time_slot_id, customer_name, customer_phone, booking_status
            FROM bookings
            WHERE branch_id = ?
-             AND booking_date = ?`,
+             AND booking_date = ?
+             AND is_deleted = 0`,
         [branchId, dateParam],
       ),
       query<LeaveRow[]>(
         `SELECT sl.staff_id
            FROM staff_leaves sl
            JOIN staff s ON s.id = sl.staff_id
-           WHERE s.branch_id = ? AND sl.leave_date = ?`,
+           WHERE s.branch_id = ? AND sl.leave_date = ?
+             AND s.is_deleted = 0`,
         [branchId, dateParam],
       ),
     ]);
@@ -284,4 +286,3 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
     </div>
   );
 }
-

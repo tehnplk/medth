@@ -96,6 +96,9 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
       JOIN staff s ON s.id = b.staff_id
       JOIN time_slots ts ON ts.id = b.time_slot_id
       WHERE b.booking_code = ? AND b.branch_id = ?
+        AND b.is_deleted = 0
+        AND br.is_deleted = 0
+        AND s.is_deleted = 0
       LIMIT 1`,
       [bookingCode, branchId],
     );
