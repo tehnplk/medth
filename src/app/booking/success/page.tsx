@@ -3,6 +3,7 @@ import Image from "next/image";
 import QRCode from "qrcode";
 import { query } from "@/lib/db";
 import SuccessHistoryLock from "@/components/success-history-lock";
+import BookingTopBar from "@/components/booking-top-bar";
 
 type SearchParams = Promise<{
   booking_code?: string | string[] | undefined;
@@ -112,17 +113,19 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
   const qrUrl = await QRCode.toDataURL(qrPayload);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
-      <SuccessHistoryLock />
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/95 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)]">
-        <p className="text-sm font-semibold text-green-700">จองสำเร็จ</p>
+    <>
+      <div className="flex-shrink-0 shadow-sm">
+        <BookingTopBar title="จองสำเร็จ" />
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <SuccessHistoryLock />
 
         {!receipt ? (
-          <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
             <p className="text-sm text-red-700">ไม่พบข้อมูลใบจอง</p>
           </div>
         ) : (
-          <section className="mt-3 rounded-2xl border border-sky-200 bg-white p-4">
+          <section className="rounded-2xl border border-sky-200 bg-white p-4">
             <p className="text-sm font-semibold text-sky-900">ใบจอง</p>
 
             <div className="mt-2 divide-y divide-sky-100 rounded-xl border border-sky-100 bg-sky-50/60">
@@ -190,6 +193,6 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
           กลับหน้าแรก
         </Link>
       </div>
-    </main>
+    </>
   );
 }

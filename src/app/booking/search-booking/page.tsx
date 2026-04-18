@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Phone, Search } from "lucide-react";
 import { query } from "@/lib/db";
+import BookingTopBar from "@/components/booking-top-bar";
 
 type SearchParams = Promise<{
   phone?: string | string[] | undefined;
@@ -126,19 +126,12 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
   const canSearch = phoneDigits.length === 10;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#f8fbff_0%,_#e0f2fe_40%,_#bfdbfe_100%)] px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-sky-200/80 bg-white/95 p-5 shadow-[0_12px_32px_-18px_rgba(37,99,235,0.24)]">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/booking"
-            className="inline-flex rounded-full border border-sky-300 px-3 py-1 text-xs font-semibold text-sky-700"
-          >
-            กลับหน้าแรก
-          </Link>
-          <p className="text-sm font-semibold text-sky-800">ค้นหาการจอง</p>
-        </div>
-
-        <section className="mt-4 rounded-2xl border border-sky-200 bg-white p-4">
+    <>
+      <div className="flex-shrink-0 shadow-sm">
+        <BookingTopBar title="ค้นหาการจอง" backHref="/booking" />
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <section className="rounded-2xl border border-sky-200 bg-white p-4">
           <p className="flex items-center gap-2 text-sm font-semibold text-sky-900">
             <Phone className="h-4 w-4 text-sky-600" />
             <span>ค้นหาด้วยเบอร์โทร</span>
@@ -239,6 +232,6 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
           </section>
         ) : null}
       </div>
-    </main>
+    </>
   );
 }
