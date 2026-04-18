@@ -6,7 +6,6 @@ import { Check, CheckCheck, Circle } from "lucide-react";
 import Swal from "sweetalert2";
 import AdminModal from "./admin-modal";
 import { formatThaiDateShort } from "@/lib/thai-date";
-import { io } from "socket.io-client";
 
 type Status = "pending" | "confirmed" | "completed";
 
@@ -95,7 +94,6 @@ export default function EmptySlotButton({
       setCustomerPhone("");
       setStatus("pending");
       router.refresh();
-      io().emit("bookingUpdate");
     } catch (error) {
       const message =
         error instanceof Error && error.message

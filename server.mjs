@@ -17,6 +17,7 @@ app.prepare().then(() => {
       methods: ["GET", "POST"],
     },
   });
+  global.io = io;
 
   io.on("connection", (socket) => {
     // console.log("Client connected", socket.id);

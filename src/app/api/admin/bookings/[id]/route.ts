@@ -36,6 +36,9 @@ export async function PATCH(
     return NextResponse.json({ error: "ไม่พบรายการจอง" }, { status: 404 });
   }
 
+  // @ts-ignore
+  if (global.io) global.io.emit("refreshBookings");
+
   return NextResponse.json({ ok: true });
 }
 
@@ -77,6 +80,9 @@ export async function DELETE(
   if (result.affectedRows === 0) {
     return NextResponse.json({ error: "ไม่พบรายการจอง" }, { status: 404 });
   }
+
+  // @ts-ignore
+  if (global.io) global.io.emit("refreshBookings");
 
   return NextResponse.json({ ok: true });
 }

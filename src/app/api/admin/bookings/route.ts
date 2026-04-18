@@ -131,6 +131,8 @@ export async function POST(request: Request) {
             booking_status,
           ],
         );
+        // @ts-ignore
+        if (global.io) global.io.emit("refreshBookings");
 
         return NextResponse.json({ ok: true, result, booking_code });
       } catch (error) {

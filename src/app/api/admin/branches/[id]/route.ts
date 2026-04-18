@@ -142,6 +142,10 @@ export async function DELETE(
     } finally {
       connection.release();
     }
+    
+    // @ts-ignore
+    if (global.io) global.io.emit("refreshBookings");
+    
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "ไม่สามารถลบสาขาได้" }, { status: 500 });
