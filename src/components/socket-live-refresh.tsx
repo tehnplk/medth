@@ -8,8 +8,11 @@ export default function SocketLiveRefresh() {
   const router = useRouter();
 
   useEffect(() => {
-    // Connect to the socket server on the current origin
-    const socket = io();
+    const socketUrl =
+      typeof window !== "undefined"
+        ? `${window.location.protocol}//${window.location.hostname}:4001`
+        : "";
+    const socket = io(socketUrl);
 
     socket.on("connect", () => {
       console.log("Connected to Bookings Live Refresh", socket.id);
