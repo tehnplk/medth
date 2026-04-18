@@ -3,6 +3,7 @@ import BookingTopBar from "@/components/booking-top-bar";
 import ConfirmBookingForm from "@/components/confirm-booking-form";
 import { query } from "@/lib/db";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
+import Link from "next/link";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -120,8 +121,13 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}&error=booked${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`;
           return (
             <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-              <meta httpEquiv="refresh" content={`0;url=${redirectUrl}`} />
-              <p className="text-slate-600 font-bold">พนักงานท่านนี้ถูกจองไปแล้ว กำลังพาท่านกลับไปเลือกใหม่...</p>
+              <p className="mb-4 font-bold text-slate-700">พนักงานท่านนี้ถูกจองไปแล้ว กรุณาเลือกพนักงานใหม่</p>
+              <Link
+                href={redirectUrl}
+                className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
+              >
+                ย้อนกลับไปเลือกพนักงาน
+              </Link>
             </div>
           );
         }
