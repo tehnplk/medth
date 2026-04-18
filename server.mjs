@@ -4,7 +4,7 @@ import { Server } from "socket.io";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = process.env.DB_HOST || "localhost";
-const port = parseInt(process.env.PORT || "3000", 10);
+const port = parseInt(process.env.PORT || "3001", 10);
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
 
