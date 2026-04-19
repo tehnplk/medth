@@ -204,7 +204,9 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
                       </div>
                       
                       <div className="flex flex-col items-end">
-                         <p className="text-lg font-black text-slate-900">{formatTime(booking.begin_time)} น.</p>
+                         <p className="text-lg font-black text-slate-900">
+                            {formatTime(booking.begin_time)} - {formatTime(booking.end_time)} น.
+                         </p>
                          <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">เวลาเข้ารับบริการ</p>
                       </div>
                     </div>
