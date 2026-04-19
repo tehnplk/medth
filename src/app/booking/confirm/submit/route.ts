@@ -11,7 +11,7 @@ function baseUrl(requestUrl: string): string {
 }
 
 type ExistsRow = { total: number };
-type BookingRow = { booking_code: string };
+type BookingRow = { booking_code: string; customer_phone: string };
 type LockRow = { lock_result: number | null };
 
 function sanitize(value: FormDataEntryValue | null): string {
@@ -159,7 +159,7 @@ export async function POST(request: Request) {
     }
 
     const [rawExistingRows] = await connection.query(
-      `SELECT booking_code
+      `SELECT booking_code, customer_phone
        FROM bookings
        WHERE branch_id = ?
          AND booking_date = ?
@@ -172,7 +172,14 @@ export async function POST(request: Request) {
     const existingRows = rawExistingRows as BookingRow[];
 
     if (existingRows.length > 0) {
-      // Staff is already booked by someone else, redirect back to staff selection
+      if (existingRows[0].customer_phone === phone) {
+        return NextResponse.redirect(
+          new URL(
+            `/booking/success?booking_code=${encodeURIComponent(existingRows[0].booking_code)}&branch=${branchId}`,
+            baseUrl(request.url),
+          ),
+        );
+      }
       const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
       return NextResponse.redirect(
         new URL(`/booking/staff?branch=${branchId}&date=${bookingDate}&slot=${slotId}&error=booked${lineIdQuery}`, baseUrl(request.url)),
@@ -200,7 +207,26 @@ export async function POST(request: Request) {
     } catch (error) {
       const dbError = error as { code?: string; errno?: number };
       if (dbError.code === "ER_DUP_ENTRY" || dbError.errno === 1062) {
-        // Duplicate booking detected, redirect back to staff selection
+        const [rawDupRows] = await connection.query(
+          `SELECT booking_code, customer_phone
+           FROM bookings
+           WHERE branch_id = ?
+             AND booking_date = ?
+             AND time_slot_id = ?
+             AND staff_id = ?
+             AND is_deleted = 0
+           LIMIT 1`,
+          [branchId, bookingDate, slotId, staffId],
+        );
+        const dupRows = rawDupRows as BookingRow[];
+        if (dupRows.length > 0 && dupRows[0].customer_phone === phone) {
+          return NextResponse.redirect(
+            new URL(
+              `/booking/success?booking_code=${encodeURIComponent(dupRows[0].booking_code)}&branch=${branchId}`,
+              baseUrl(request.url),
+            ),
+          );
+        }
         const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
         return NextResponse.redirect(
           new URL(`/booking/staff?branch=${branchId}&date=${bookingDate}&slot=${slotId}&error=booked${lineIdQuery}`, baseUrl(request.url)),
