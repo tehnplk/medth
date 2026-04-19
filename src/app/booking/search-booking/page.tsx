@@ -1,9 +1,11 @@
-import { Calendar, Phone, Search, User } from "lucide-react";
+import { Calendar, Clock, MapPin, Phone, Search, User } from "lucide-react";
 import { query } from "@/lib/db";
 import BookingTopBar from "@/components/booking-top-bar";
+import PhoneSearchInput from "@/components/phone-search-input";
 
 type SearchParams = Promise<{
   phone?: string | string[] | undefined;
+  line_id?: string | string[] | undefined;
 }>;
 
 type BookingSearchRow = {
@@ -12,6 +14,7 @@ type BookingSearchRow = {
   customer_phone: string;
   booking_date: string | Date;
   booking_status: "pending" | "confirmed" | "completed";
+  is_deleted: number;
   branch_name: string;
   staff_name: string;
   begin_time: string;
@@ -87,30 +90,47 @@ function formatTime(raw: string): string {
 export default async function SearchBookingPage(props: { searchParams: SearchParams }) {
   const searchParams = await props.searchParams;
   const phoneParam = getQueryValue(searchParams.phone);
+  const lineIdParam = getQueryValue(searchParams.line_id).trim();
   const phoneDigits = normalizePhoneDigits(phoneParam);
 
   let hasDbError = false;
   let results: BookingSearchRow[] = [];
 
-  if (phoneDigits.length === 10) {
+  const selectColumns = `
+      b.booking_code,
+      b.customer_name,
+      b.customer_phone,
+      b.booking_date,
+      b.booking_status,
+      b.is_deleted,
+      br.name AS branch_name,
+      s.full_name AS staff_name,
+      ts.begin_time,
+      ts.end_time
+    FROM bookings b
+    JOIN branches br ON br.id = b.branch_id
+    JOIN staff s ON s.id = b.staff_id
+    JOIN time_slots ts ON ts.id = b.time_slot_id`;
+
+  if (lineIdParam) {
     try {
       results = await query<BookingSearchRow[]>(
-        `SELECT
-          b.booking_code,
-          b.customer_name,
-          b.customer_phone,
-          b.booking_date,
-          b.booking_status,
-          br.name AS branch_name,
-          s.full_name AS staff_name,
-          ts.begin_time,
-          ts.end_time
-        FROM bookings b
-        JOIN branches br ON br.id = b.branch_id
-        JOIN staff s ON s.id = b.staff_id
-        JOIN time_slots ts ON ts.id = b.time_slot_id
+        `SELECT ${selectColumns}
+        WHERE b.line_id = ?
+          AND br.is_deleted = 0
+          AND s.is_deleted = 0
+        ORDER BY b.booking_date DESC, ts.begin_time ASC, b.id DESC
+        LIMIT 20`,
+        [lineIdParam],
+      );
+    } catch {
+      hasDbError = true;
+    }
+  } else if (phoneDigits.length === 10) {
+    try {
+      results = await query<BookingSearchRow[]>(
+        `SELECT ${selectColumns}
         WHERE REPLACE(REPLACE(REPLACE(REPLACE(b.customer_phone, '-', ''), ' ', ''), '(', ''), ')', '') = ?
-          AND b.is_deleted = 0
           AND br.is_deleted = 0
           AND s.is_deleted = 0
         ORDER BY b.booking_date DESC, ts.begin_time ASC, b.id DESC
@@ -122,8 +142,7 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
     }
   }
 
-  const hasSearch = phoneParam.trim().length > 0;
-  const canSearch = phoneDigits.length === 10;
+  const canSearch = phoneDigits.length === 10 || lineIdParam.length > 0;
 
   return (
     <>
@@ -143,20 +162,7 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
             
             <div className="p-6">
               <form action="/booking/search-booking" method="GET" className="space-y-4">
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                    <Phone className="h-5 w-5 text-slate-300" />
-                  </div>
-                  <input
-                    type="tel"
-                    name="phone"
-                    inputMode="numeric"
-                    placeholder="08X-XXX-XXXX"
-                    defaultValue={formatPhoneMask(phoneParam)}
-                    autoComplete="off"
-                    className="block w-full rounded-2xl border-2 border-slate-300 bg-white py-4 pl-12 pr-4 text-base font-medium text-slate-900 placeholder:text-slate-400 focus:border-sky-600 focus:outline-none focus:ring-4 focus:ring-sky-100 transition-all shadow-sm"
-                  />
-                </div>
+                <PhoneSearchInput defaultValue={phoneParam} />
 
                 <button
                   type="submit"
@@ -173,7 +179,10 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
             <div className="mt-10 space-y-6">
               <div className="flex items-center justify-between px-2">
                 <h3 className="text-xl font-black text-slate-900">
-                   ผลการค้นหาสำหรับ <span className="text-sky-600">{formatPhoneMask(phoneDigits)}</span>
+                   ผลการค้นหาสำหรับ{" "}
+                   <span className="text-sky-600">
+                     {lineIdParam ? "บัญชีไลน์" : formatPhoneMask(phoneDigits)}
+                   </span>
                 </h3>
                 <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-black text-slate-600">
                    {results.length} รายการ
@@ -184,52 +193,48 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
                 {results.map((booking) => (
                   <article
                     key={booking.booking_code}
-                    className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100"
+                    className={`group relative overflow-hidden rounded-3xl border p-5 transition-all duration-300 ${
+                      booking.is_deleted === 1
+                        ? "border-slate-200 bg-slate-100 [&_*:not(.cancel-badge)]:opacity-65"
+                        : "border-slate-200 bg-white hover:border-sky-300 hover:shadow-xl hover:shadow-sky-100"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs font-black uppercase tracking-widest text-white">
-                             {booking.booking_code}
-                          </span>
-                          <span className={`${
-                            booking.booking_status === 'completed' ? 'text-emerald-600 bg-emerald-50' : 
-                            booking.booking_status === 'confirmed' ? 'text-sky-600 bg-sky-50' : 
-                            'text-amber-600 bg-amber-50'
-                          } text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full`}>
-                             {booking.booking_status}
-                          </span>
-                        </div>
-                        <h4 className="text-xl font-black text-slate-900">{booking.branch_name}</h4>
-                      </div>
-                      
-                      <div className="flex flex-col items-end">
-                         <p className="text-lg font-black text-slate-900">
-                            {formatTime(booking.begin_time)} - {formatTime(booking.end_time)} น.
-                         </p>
-                         <p className="text-xs font-bold text-slate-500 uppercase tracking-tighter">เวลาเข้ารับบริการ</p>
-                      </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {booking.is_deleted === 1 ? (
+                        <span className="cancel-badge text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full text-red-600 bg-red-50 border-2 border-red-600">
+                          ยกเลิกแล้ว
+                        </span>
+                      ) : booking.booking_status !== "pending" ? (
+                        <span className={`${
+                          booking.booking_status === 'completed' ? 'text-emerald-600 bg-emerald-50 border-emerald-600' :
+                          'text-sky-600 bg-sky-50 border-sky-600'
+                        } text-xs font-black uppercase tracking-widest px-2 py-0.5 rounded-full border-2`}>
+                           {booking.booking_status}
+                        </span>
+                      ) : null}
+                      <span className="ml-auto text-sm font-black text-slate-900">
+                         {booking.customer_name}
+                      </span>
                     </div>
 
-                    <div className="mt-6 flex flex-wrap items-center gap-y-4 gap-x-8 border-t border-slate-50 pt-6">
-                      <div className="flex items-center gap-3">
-                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sky-600">
-                            <Calendar className="h-5 w-5" />
-                         </div>
-                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 leading-none">วันที่</span>
-                            <span className="text-base font-bold text-slate-700">{toThaiDateLabel(booking.booking_date)}</span>
-                         </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 shrink-0 text-sky-600" />
+                        <span className="text-sm font-bold text-slate-900">{booking.branch_name}</span>
                       </div>
-
-                      <div className="flex items-center gap-3">
-                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sky-600">
-                            <User className="h-5 w-5" />
-                         </div>
-                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 leading-none">พนักงาน</span>
-                            <span className="text-base font-bold text-slate-700">{booking.staff_name}</span>
-                         </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 shrink-0 text-sky-600" />
+                        <span className="text-sm font-bold text-slate-900">{toThaiDateLabel(booking.booking_date)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 shrink-0 text-sky-600" />
+                        <span className="text-sm font-bold text-slate-900">{booking.staff_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 shrink-0 text-sky-600" />
+                        <span className="text-sm font-bold text-slate-900">
+                          {formatTime(booking.begin_time)} - {formatTime(booking.end_time)} น.
+                        </span>
                       </div>
                     </div>
                   </article>
