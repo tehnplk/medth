@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, Phone, Search, User } from "lucide-react";
+import { Calendar, Clock, MapPin, Search, User } from "lucide-react";
 import { query } from "@/lib/db";
 import BookingTopBar from "@/components/booking-top-bar";
 import PhoneSearchInput from "@/components/phone-search-input";
@@ -152,39 +152,36 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
 
       <div className="flex-1 overflow-y-auto bg-slate-50/50 px-4 py-8 sm:px-8">
         <div className="mx-auto max-w-2xl">
-          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                <div className="bg-slate-900 px-6 py-6 text-white text-center">
-                   <h3 className="flex items-center justify-center gap-2 text-2xl font-black">
-                     <Phone className="h-6 w-6 text-sky-400" />
-                     เบอร์โทรศัพท์
-                   </h3>
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <form action="/booking/search-booking" method="GET" className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-500">
+                เบอร์โทรที่ใช้จอง
+              </label>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <div className="flex-1">
+                  <PhoneSearchInput defaultValue={phoneParam} />
                 </div>
-            
-            <div className="p-6">
-              <form action="/booking/search-booking" method="GET" className="space-y-4">
-                <PhoneSearchInput defaultValue={phoneParam} />
-
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-sky-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-sky-200 transition-all hover:bg-sky-700 hover:-translate-y-0.5 active:translate-y-0"
+                  className="flex items-center justify-center gap-2 rounded-2xl bg-violet-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-violet-200 transition-all hover:bg-violet-700 active:scale-[0.98]"
                 >
-                  <Search className="h-5 w-5" />
-                  ค้นหารายการจอง
+                  <Search className="h-4 w-4" />
+                  ค้นหา
                 </button>
-              </form>
-            </div>
+              </div>
+            </form>
           </section>
 
           {canSearch ? (
             <div className="mt-10 space-y-6">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-xl font-black text-slate-900">
+              <div className="flex items-center justify-between gap-2 px-2">
+                <h3 className="min-w-0 flex-1 truncate text-sm font-bold text-slate-900 sm:text-base">
                    ผลการค้นหาสำหรับ{" "}
-                   <span className="text-sky-600">
+                   <span className="text-violet-600">
                      {lineIdParam ? "บัญชีไลน์" : formatPhoneMask(phoneDigits)}
                    </span>
                 </h3>
-                <span className="rounded-full bg-slate-200 px-3 py-1 text-xs font-black text-slate-600">
+                <span className="shrink-0 whitespace-nowrap rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-600">
                    {results.length} รายการ
                 </span>
               </div>
@@ -219,19 +216,19 @@ export default async function SearchBookingPage(props: { searchParams: SearchPar
 
                     <div className="mt-4 grid grid-cols-2 gap-3">
                       <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 shrink-0 text-sky-600" />
+                        <MapPin className="h-4 w-4 shrink-0 text-violet-600" />
                         <span className="text-sm font-bold text-slate-900">{booking.branch_name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 shrink-0 text-sky-600" />
+                        <Calendar className="h-4 w-4 shrink-0 text-violet-600" />
                         <span className="text-sm font-bold text-slate-900">{toThaiDateLabel(booking.booking_date)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 shrink-0 text-sky-600" />
+                        <User className="h-4 w-4 shrink-0 text-violet-600" />
                         <span className="text-sm font-bold text-slate-900">{booking.staff_name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 shrink-0 text-sky-600" />
+                        <Clock className="h-4 w-4 shrink-0 text-violet-600" />
                         <span className="text-sm font-bold text-slate-900">
                           {formatTime(booking.begin_time)} - {formatTime(booking.end_time)} น.
                         </span>
