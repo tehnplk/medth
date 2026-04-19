@@ -29,11 +29,16 @@ type LeaveCountRow = {
   leave_count: number;
 };
 
+type DateOffRow = {
+  date_off_key: string;
+};
+
 type DateItem = {
   key: string;
   dayLabel: string;
   dateLabel: string;
   availableQueues: number;
+  disabled: boolean;
 };
 
 const thaiWeekdays = [
@@ -100,6 +105,7 @@ function buildDateItems(days: number): DateItem[] {
       dayLabel: thaiWeekdays[weekday],
       dateLabel,
       availableQueues: 0,
+      disabled: false,
     });
   }
 
@@ -136,7 +142,7 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
 
   if (!hasDbError && branchName && startDate && endDate) {
     try {
-      const [staffRows, slotRows, bookingRows, leaveRows] = await Promise.all([
+      const [staffRows, slotRows, bookingRows, leaveRows, dateOffRows] = await Promise.all([
         query<CountRow[]>(
           "SELECT COUNT(*) AS total FROM staff WHERE branch_id = ? AND status = 'active' AND is_deleted = 0",
           [branchId],
@@ -163,6 +169,13 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
            GROUP BY DATE_FORMAT(sl.leave_date, '%Y-%m-%d')`,
           [branchId, startDate, endDate],
         ),
+        query<DateOffRow[]>(
+          `SELECT DATE_FORMAT(date_off, '%Y-%m-%d') AS date_off_key
+           FROM branch_date_off
+           WHERE branch_id = ?
+             AND date_off BETWEEN ? AND ?`,
+          [branchId, startDate, endDate],
+        ),
       ]);
 
       const totalStaff = staffRows[0]?.total ?? 0;
@@ -173,13 +186,20 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
       const leaveCountMap = new Map(
         leaveRows.map((row) => [row.leave_date_key, Number(row.leave_count) || 0]),
       );
+      const dateOffSet = new Set(dateOffRows.map((row) => row.date_off_key));
 
       dates.forEach((item) => {
+        if (dateOffSet.has(item.key)) {
+          item.availableQueues = 0;
+          item.disabled = true;
+          return;
+        }
         const bookedCount = bookedCountMap.get(item.key) ?? 0;
         const leaveCount = leaveCountMap.get(item.key) ?? 0;
         const availableStaff = Math.max(totalStaff - leaveCount, 0);
         const maxQueues = availableStaff * totalSlots;
         item.availableQueues = Math.max(maxQueues - bookedCount, 0);
+        item.disabled = false;
       });
     } catch {
       hasDbError = true;
@@ -230,17 +250,16 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
             {dates.map((item) => {
               const isSelected = item.key === dateParam;
               const isFull = item.availableQueues === 0;
+              const isDateOff = item.disabled;
+              const isUnavailable = isDateOff;
+              const cardClass = `group relative flex flex-col items-center gap-1 rounded-2xl border p-4 text-center transition-all duration-300 ${
+                isSelected
+                  ? "border-sky-500 bg-sky-50 shadow-lg shadow-sky-100 ring-2 ring-sky-500"
+                  : "border-slate-200 bg-white hover:border-sky-300 hover:shadow-md"
+              } ${isUnavailable ? "opacity-60 grayscale-[0.5] pointer-events-none" : ""}`;
 
-              return (
-                <Link
-                  key={item.key}
-                  href={`/booking/time?branch=${branchId}&date=${item.key}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
-                  className={`group relative flex flex-col items-center gap-1 rounded-2xl border p-4 text-center transition-all duration-300 ${
-                    isSelected
-                      ? "border-sky-500 bg-sky-50 shadow-lg shadow-sky-100 ring-2 ring-sky-500"
-                      : "border-slate-200 bg-white hover:border-sky-300 hover:shadow-md"
-                  } ${isFull ? "opacity-60 grayscale-[0.5]" : ""}`}
-                >
+              const content = (
+                <>
                   <span className={`text-[11px] font-bold uppercase tracking-wider ${isSelected ? "text-sky-700" : "text-slate-400 group-hover:text-sky-600"}`}>
                     {item.dayLabel.replace("วัน", "")}
                   </span>
@@ -250,16 +269,36 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
                   <span className={`text-[11px] font-bold ${isSelected ? "text-sky-700" : "text-slate-500"}`}>
                     {item.dateLabel.split(" ")[1]}
                   </span>
-                  
+
                   <div className={`mt-3 w-full rounded-full py-1 text-[10px] font-black tracking-tight ${
-                    isFull 
-                      ? "bg-slate-100 text-slate-400" 
-                      : isSelected 
-                        ? "bg-sky-600 text-white" 
-                        : "bg-sky-50 text-sky-700 group-hover:bg-sky-600 group-hover:text-white transition-colors"
+                    isDateOff
+                      ? "bg-rose-100 text-rose-700"
+                      : isFull
+                        ? "bg-slate-100 text-slate-400"
+                        : isSelected
+                          ? "bg-sky-600 text-white"
+                          : "bg-sky-50 text-sky-700 group-hover:bg-sky-600 group-hover:text-white transition-colors"
                   }`}>
-                    {isFull ? "คิวเต็ม" : `ว่าง ${item.availableQueues} คิว`}
+                    {isDateOff ? "วันหยุดทำการ" : isFull ? "คิวเต็ม" : `ว่าง ${item.availableQueues} คิว`}
                   </div>
+                </>
+              );
+
+              if (isUnavailable) {
+                return (
+                  <div key={item.key} className={cardClass}>
+                    {content}
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.key}
+                  href={`/booking/time?branch=${branchId}&date=${item.key}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
+                  className={cardClass}
+                >
+                  {content}
                 </Link>
               );
             })}

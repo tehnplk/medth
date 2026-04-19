@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import {
   CalendarClock,
   CalendarCheck,
+  CalendarX,
   ChevronRight,
   LogOut,
   MapPinned,
@@ -25,6 +26,12 @@ const menuItems = [
     label: "จัดการสาขา",
     description: "ข้อมูลสาขาและสถานะ",
     icon: MapPinned,
+  },
+  {
+    href: "/admin/date-off",
+    label: "จัดการวันหยุด",
+    description: "วันหยุดแต่ละสาขา",
+    icon: CalendarX,
   },
   {
     href: "/admin/staff",

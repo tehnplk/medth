@@ -29,6 +29,10 @@ type LeaveCountRow = {
   total: number;
 };
 
+type DateOffCountRow = {
+  total: number;
+};
+
 type TimeSlotRow = {
   id: number;
   begin_time: string;
@@ -92,6 +96,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   let hasDbError = false;
   let branchName = "";
   let slots: TimeSlotRow[] = [];
+  let isBranchDateOff = false;
 
   if (Number.isFinite(branchId) && branchId > 0) {
     try {
@@ -113,7 +118,11 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
 
   if (!hasDbError && branchName && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     try {
-      const [staffRows, bookingRows, leaveRows] = await Promise.all([
+      const [dateOffRows, staffRows, bookingRows, leaveRows] = await Promise.all([
+        query<DateOffCountRow[]>(
+          "SELECT COUNT(*) AS total FROM branch_date_off WHERE branch_id = ? AND date_off = ?",
+          [branchId, dateParam],
+        ),
         query<CountRow[]>(
           "SELECT COUNT(*) AS total FROM staff WHERE branch_id = ? AND status = 'active' AND is_deleted = 0",
           [branchId],
@@ -138,20 +147,26 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
         ),
       ]);
 
-      const totalStaff = staffRows[0]?.total ?? 0;
-      const leaveCount = leaveRows[0]?.total ?? 0;
-      const availableStaff = Math.max(totalStaff - leaveCount, 0);
-      const bookedCountMap = new Map(
-        bookingRows.map((row) => [row.time_slot_id, Number(row.booked_count) || 0]),
-      );
+      isBranchDateOff = (dateOffRows[0]?.total ?? 0) > 0;
 
-      slots = slots.map((slot) => {
-        const bookedCount = bookedCountMap.get(slot.id) ?? 0;
-        return {
-          ...slot,
-          available_staff_count: Math.max(availableStaff - bookedCount, 0),
-        };
-      });
+      if (isBranchDateOff) {
+        slots = [];
+      } else {
+        const totalStaff = staffRows[0]?.total ?? 0;
+        const leaveCount = leaveRows[0]?.total ?? 0;
+        const availableStaff = Math.max(totalStaff - leaveCount, 0);
+        const bookedCountMap = new Map(
+          bookingRows.map((row) => [row.time_slot_id, Number(row.booked_count) || 0]),
+        );
+
+        slots = slots.map((slot) => {
+          const bookedCount = bookedCountMap.get(slot.id) ?? 0;
+          return {
+            ...slot,
+            available_staff_count: Math.max(availableStaff - bookedCount, 0),
+          };
+        });
+      }
     } catch {
       hasDbError = true;
     }
@@ -185,6 +200,12 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
           {hasDbError ? (
             <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-800 font-medium">
               โหลดข้อมูลช่วงเวลาไม่สำเร็จ กรุณาลองใหมีกครั้ง
+            </div>
+          ) : null}
+
+          {!hasDbError && isBranchDateOff ? (
+            <div className="mb-6 rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 font-medium">
+              วันที่เลือกเป็นวันหยุดของสาขา ไม่สามารถจองคิวได้
             </div>
           ) : null}
 

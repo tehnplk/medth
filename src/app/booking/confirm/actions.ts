@@ -111,6 +111,10 @@ export async function submitBooking(formData: FormData): Promise<void> {
         `SELECT id FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1`,
         [branchId],
       );
+      const [rawDateOffRows] = await connection.query(
+        `SELECT id FROM branch_date_off WHERE branch_id = ? AND date_off = ? LIMIT 1`,
+        [branchId, bookingDate],
+      );
       const [rawStaffRows] = await connection.query(
         `SELECT id FROM staff WHERE id = ? AND branch_id = ? AND status = 'active' AND is_deleted = 0 LIMIT 1`,
         [staffId, branchId],
@@ -122,6 +126,7 @@ export async function submitBooking(formData: FormData): Promise<void> {
 
       if (
         (rawBranchRows as unknown[]).length === 0 ||
+        (rawDateOffRows as unknown[]).length > 0 ||
         (rawStaffRows as unknown[]).length === 0 ||
         (rawSlotRows as unknown[]).length === 0
       ) {
