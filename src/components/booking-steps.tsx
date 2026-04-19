@@ -24,9 +24,9 @@ export default function BookingSteps({ currentStep, stepLinks = [] }: BookingSte
               <div
                 className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                   isDone
-                    ? "bg-sky-600 text-white shadow-lg shadow-sky-200"
+                    ? "bg-violet-600 text-white shadow-lg shadow-violet-200"
                     : isCurrent
-                      ? "ring-2 ring-sky-600 ring-offset-2 bg-sky-600 text-white shadow-lg shadow-sky-100"
+                      ? "ring-2 ring-violet-600 ring-offset-2 bg-violet-600 text-white shadow-lg shadow-violet-100"
                       : "bg-slate-50 text-slate-400 ring-1 ring-slate-200"
                 }`}
               >
@@ -34,7 +34,7 @@ export default function BookingSteps({ currentStep, stepLinks = [] }: BookingSte
               </div>
               <span
                 className={`w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-[11px] font-bold tracking-tight uppercase transition-colors duration-300 ${
-                  isDone || isCurrent ? "text-sky-700" : "text-slate-400"
+                  isDone || isCurrent ? "text-violet-700" : "text-slate-400"
                 }`}
               >
                 {label}
@@ -58,7 +58,7 @@ export default function BookingSteps({ currentStep, stepLinks = [] }: BookingSte
               </div>
               {!isLast && (
                 <div className="mx-2 mb-5 flex-1">
-                  <div className={`h-[2px] w-full rounded-full transition-colors duration-500 ${isDone ? "bg-sky-500" : "bg-slate-100"}`} />
+                  <div className={`h-[2px] w-full rounded-full transition-colors duration-500 ${isDone ? "bg-violet-500" : "bg-slate-100"}`} />
                 </div>
               )}
             </div>

@@ -16,7 +16,13 @@ type SearchParams = Promise<{
 
 type BranchRow = { id: number; name: string };
 type TimeSlotRow = { id: number; begin_time: string; end_time: string };
-type StaffRow = { id: number; full_name: string; staff_code: string; photo_path: string | null };
+type StaffRow = {
+  id: number;
+  full_name: string;
+  staff_code: string;
+  gender: "male" | "female" | "other";
+  photo_path: string | null;
+};
 type BookingStatus = "pending" | "confirmed" | "completed";
 type BookingRow = {
   id: number;
@@ -77,7 +83,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
         [branchId],
       ),
       query<StaffRow[]>(
-        `SELECT id, full_name, staff_code, photo_path
+        `SELECT id, full_name, staff_code, gender, photo_path
            FROM staff
            WHERE branch_id = ? AND status = 'active' AND is_deleted = 0
            ORDER BY staff_code ASC`,
@@ -206,7 +212,15 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
                     <tr key={s.id} className="odd:bg-white even:bg-sky-50/40">
                       <td className="sticky left-0 border-b border-sky-100 bg-inherit px-3 py-2 font-medium text-slate-900">
                         <div className="flex items-center gap-2">
-                          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-sky-100 bg-slate-50 flex items-center justify-center text-slate-400">
+                          <div
+                            className={`relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-sky-100 flex items-center justify-center ${
+                              s.gender === "male"
+                                ? "bg-sky-100 text-sky-500"
+                                : s.gender === "female"
+                                  ? "bg-pink-100 text-pink-500"
+                                  : "bg-slate-50 text-slate-400"
+                            }`}
+                          >
                             {s.photo_path ? (
                               <Image
                                 src={s.photo_path}

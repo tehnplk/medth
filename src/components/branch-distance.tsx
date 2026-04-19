@@ -1,5 +1,6 @@
 "use client";
 
+import { Navigation } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -82,5 +83,10 @@ export default function BranchDistance({ lat, lng }: Props) {
       break;
   }
 
-  return <>ระยะทางจากคุณ: {text}</>;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+      <Navigation className="h-4 w-4 text-sky-600" />
+      {text}
+    </span>
+  );
 }

@@ -2,14 +2,16 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, X, User, Calendar, Clock } from "lucide-react";
-import ThumbnailPlaceholder from "@/components/thumbnail-placeholder";
+import Image from "next/image";
+import { Search, User, X } from "lucide-react";
 
 type StaffRow = {
   id: number;
   staff_code: string;
   full_name: string;
   phone: string | null;
+  gender: "male" | "female" | "other";
+  photo_path: string | null;
   skill_note: string | null;
   status: "active" | "inactive";
   is_booked: number;
@@ -96,7 +98,28 @@ export default function StaffList({ initialStaff, branchId, dateParam, slotId, l
               
               <div className="flex items-center gap-5">
                 <div className="relative shrink-0">
-                  <ThumbnailPlaceholder kind="staff" label={staff.full_name} />
+                  <div
+                    className={`relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full border border-white/70 shadow-[0_14px_24px_-16px_rgba(37,99,235,0.65)] ${
+                      staff.gender === "male"
+                        ? "bg-sky-100 text-sky-500"
+                        : staff.gender === "female"
+                          ? "bg-pink-100 text-pink-500"
+                          : "bg-slate-100 text-slate-400"
+                    }`}
+                  >
+                    {staff.photo_path ? (
+                      <Image
+                        src={staff.photo_path}
+                        alt={staff.full_name}
+                        fill
+                        sizes="56px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <User className="h-7 w-7" />
+                    )}
+                  </div>
                   {!isDisabled && (
                     <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-500" />
                   )}

@@ -1,10 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
 import BookingTopBar from "@/components/booking-top-bar";
 import BranchDistance from "@/components/branch-distance";
 import ThumbnailPlaceholder from "@/components/thumbnail-placeholder";
-import { ChevronRight, Clock, MapPin } from "lucide-react";
+import { Clock, MapPin } from "lucide-react";
 
 
 type BranchRow = {
@@ -13,6 +14,7 @@ type BranchRow = {
   location_detail: string | null;
   opening_hours: string | null;
   coordinates: string | null;
+  cover_image: string | null;
 };
 
 type SearchParams = Promise<{
@@ -29,6 +31,7 @@ type Branch = {
   name: string;
   locationDetail: string;
   openingHours: string;
+  coverImage: string | null;
   lat: number | null;
   lng: number | null;
 };
@@ -51,7 +54,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
 
   try {
     const rows = await query<BranchRow[]>(
-      "SELECT id, name, location_detail, opening_hours, coordinates FROM branches WHERE is_active = 1 AND is_deleted = 0 ORDER BY id ASC",
+      "SELECT id, name, location_detail, opening_hours, coordinates, cover_image FROM branches WHERE is_active = 1 AND is_deleted = 0 ORDER BY id ASC",
     );
 
     branches = rows.map((row) => {
@@ -61,6 +64,7 @@ export default async function Home(props: { searchParams: SearchParams }) {
         name: row.name,
         locationDetail: row.location_detail ?? "-",
         openingHours: row.opening_hours ?? "-",
+        coverImage: row.cover_image,
         lat,
         lng,
       };
@@ -104,8 +108,21 @@ export default async function Home(props: { searchParams: SearchParams }) {
                 href={`/booking/date?branch=${String(branch.id)}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`}
                 className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100 active:scale-[0.98]"
               >
-                <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100">
-                   <ThumbnailPlaceholder kind="branch" label={branch.name} />
+                <div className="relative h-24 w-full overflow-hidden bg-slate-100">
+                   {branch.coverImage ? (
+                     <Image
+                       src={branch.coverImage}
+                       alt={branch.name}
+                       fill
+                       sizes="(min-width: 640px) 50vw, 100vw"
+                       className="object-cover"
+                       unoptimized
+                     />
+                   ) : (
+                     <div className="flex h-full w-full items-center justify-center">
+                       <ThumbnailPlaceholder kind="branch" label={branch.name} />
+                     </div>
+                   )}
                 </div>
                 
                 <div className="flex flex-1 flex-col p-6">
@@ -113,9 +130,9 @@ export default async function Home(props: { searchParams: SearchParams }) {
                     <h3 className="text-xl font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
                       {branch.name}
                     </h3>
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-colors group-hover:bg-sky-50 group-hover:text-sky-600">
-                       <ChevronRight className="h-5 w-5" />
-                    </div>
+                    <span className="shrink-0 rounded-full bg-sky-600 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-white transition-colors group-hover:bg-sky-700">
+                      จองเลย
+                    </span>
                   </div>
                   
                   <div className="mt-4 space-y-3">
@@ -130,11 +147,8 @@ export default async function Home(props: { searchParams: SearchParams }) {
                     </div>
                   </div>
                   
-                  <div className="mt-auto pt-5">
-                    <div className="flex items-center justify-between border-t border-slate-50 pt-4">
-                       <BranchDistance lat={branch.lat} lng={branch.lng} />
-                       <span className="text-xs font-bold uppercase tracking-wider text-sky-600">จองเลย</span>
-                    </div>
+                  <div className="mt-3 border-t border-slate-50 pt-2">
+                     <BranchDistance lat={branch.lat} lng={branch.lng} />
                   </div>
                 </div>
               </Link>
