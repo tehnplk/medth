@@ -10,6 +10,10 @@ function baseUrl(requestUrl: string): string {
   return process.env.NEXTAUTH_URL ?? requestUrl;
 }
 
+function seeOther(url: URL): NextResponse {
+  return NextResponse.redirect(url, 303);
+}
+
 type ExistsRow = { total: number };
 type BookingRow = { booking_code: string; customer_phone: string };
 type LockRow = { lock_result: number | null };
@@ -86,7 +90,7 @@ export async function POST(request: Request) {
     !phone
   ) {
     const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
-    return NextResponse.redirect(
+    return seeOther(
       new URL(
         `/booking/confirm?branch=${branchId || ""}&date=${bookingDate}&slot=${slotId || ""}&staff=${staffId || ""}${lineIdQuery}`,
         baseUrl(request.url),
@@ -113,7 +117,7 @@ export async function POST(request: Request) {
 
     if (lockResult !== 1) {
       const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
-      return NextResponse.redirect(
+      return seeOther(
         new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}${lineIdQuery}`, baseUrl(request.url)),
       );
     }
@@ -153,7 +157,7 @@ export async function POST(request: Request) {
 
     if (branchRows.length === 0 || staffRows.length === 0 || slotRows.length === 0) {
       const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
-      return NextResponse.redirect(
+      return seeOther(
         new URL(`/booking/confirm?branch=${branchId}&date=${bookingDate}&slot=${slotId}&staff=${staffId}${lineIdQuery}`, baseUrl(request.url)),
       );
     }
@@ -173,7 +177,7 @@ export async function POST(request: Request) {
 
     if (existingRows.length > 0) {
       if (existingRows[0].customer_phone === phone) {
-        return NextResponse.redirect(
+        return seeOther(
           new URL(
             `/booking/success?booking_code=${encodeURIComponent(existingRows[0].booking_code)}&branch=${branchId}`,
             baseUrl(request.url),
@@ -181,7 +185,7 @@ export async function POST(request: Request) {
         );
       }
       const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
-      return NextResponse.redirect(
+      return seeOther(
         new URL(`/booking/staff?branch=${branchId}&date=${bookingDate}&slot=${slotId}&error=booked${lineIdQuery}`, baseUrl(request.url)),
       );
     }
@@ -220,7 +224,7 @@ export async function POST(request: Request) {
         );
         const dupRows = rawDupRows as BookingRow[];
         if (dupRows.length > 0 && dupRows[0].customer_phone === phone) {
-          return NextResponse.redirect(
+          return seeOther(
             new URL(
               `/booking/success?booking_code=${encodeURIComponent(dupRows[0].booking_code)}&branch=${branchId}`,
               baseUrl(request.url),
@@ -228,7 +232,7 @@ export async function POST(request: Request) {
           );
         }
         const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
-        return NextResponse.redirect(
+        return seeOther(
           new URL(`/booking/staff?branch=${branchId}&date=${bookingDate}&slot=${slotId}&error=booked${lineIdQuery}`, baseUrl(request.url)),
         );
       }
@@ -237,7 +241,7 @@ export async function POST(request: Request) {
 
     if (global.io) global.io.emit("refreshBookings");
 
-    return NextResponse.redirect(
+    return seeOther(
       new URL(`/booking/success?booking_code=${encodeURIComponent(code)}&branch=${branchId}`, baseUrl(request.url)),
     );
   } finally {
