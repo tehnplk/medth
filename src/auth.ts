@@ -45,8 +45,12 @@ export const authOptions: NextAuthOptions = {
         );
 
         const user = rows[0];
-        if (!user || !user.is_active) {
+        if (!user) {
           return null;
+        }
+
+        if (user.is_active !== 1) {
+          throw new Error("User account is suspended");
         }
 
         const isValidPassword = await compare(password, user.password_hash);
@@ -67,12 +71,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role ?? "user";
+        token.id = (user as { id?: string }).id ?? "";
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         (session.user as { role?: string }).role = token.role as string | undefined;
+        (session.user as { id?: string }).id = token.id as string | undefined;
       }
       return session;
     },

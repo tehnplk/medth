@@ -58,7 +58,7 @@ function toForm(row: BranchRow): BranchForm {
   };
 }
 
-export default function AdminBranchesGrid({ initialRows }: { initialRows: BranchRow[] }) {
+export default function AdminBranchesGrid({ initialRows, userRole }: { initialRows: BranchRow[]; userRole: string }) {
   const [rows, setRows] = useState(initialRows);
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -185,14 +185,16 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
           </p>
           <h1 className="mt-2 text-2xl font-semibold text-slate-950">จัดการสาขา</h1>
         </div>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
-        >
-          <Plus className="h-4 w-4" />
-          เพิ่มสาขา
-        </button>
+        {userRole === "admin" && (
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700"
+          >
+            <Plus className="h-4 w-4" />
+            เพิ่มสาขา
+          </button>
+        )}
       </div>
 
       {error ? (
@@ -258,14 +260,16 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
                       <Pencil className="h-3.5 w-3.5" />
                       แก้ไข
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(row)}
-                      className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      ลบ
-                    </button>
+                    {userRole === "admin" && (
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(row)}
+                        className="inline-flex items-center gap-1 rounded-full border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        ลบ
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

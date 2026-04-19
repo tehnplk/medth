@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LogOut,
   MapPinned,
+  ShieldUser,
   UsersRound,
 } from "lucide-react";
 
@@ -37,14 +38,25 @@ const menuItems = [
     description: "ช่วงเวลาเปิดรับจอง",
     icon: CalendarClock,
   },
+  {
+    href: "/admin/users",
+    label: "จัดการผู้ใช้งาน",
+    description: "จัดการผู้ใช้งานและสิทธิ์การเข้าถึง",
+    icon: ShieldUser,
+  },
 ];
 
 type AdminSidebarProps = {
   currentUserName?: string | null;
+  currentRole?: string | null;
 };
 
-export default function AdminSidebar({ currentUserName }: AdminSidebarProps) {
+export default function AdminSidebar({ currentUserName, currentRole }: AdminSidebarProps) {
   const pathname = usePathname();
+
+  const filteredMenuItems = menuItems.filter(
+    (item) => item.href !== "/admin/users" || currentRole === "admin",
+  );
 
   return (
     <aside className="rounded-[28px] border border-sky-200/80 bg-white/88 p-4 shadow-[0_16px_34px_-24px_rgba(37,99,235,0.35)] backdrop-blur">
@@ -56,7 +68,7 @@ export default function AdminSidebar({ currentUserName }: AdminSidebarProps) {
       </div>
 
       <nav className="space-y-2">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 

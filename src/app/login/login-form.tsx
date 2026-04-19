@@ -50,7 +50,11 @@ export default function LoginForm({ callbackUrl, initialErrorCode }: LoginFormPr
     setIsSubmitting(false);
 
     if (result?.error) {
-      setSubmitError(errorMessageByType[result.error] ?? "Unable to sign in.");
+      if (result.error === "User account is suspended") {
+        setSubmitError("User ถูกระงับใช้งาน");
+      } else {
+        setSubmitError(errorMessageByType[result.error] ?? "Unable to sign in.");
+      }
       return;
     }
 

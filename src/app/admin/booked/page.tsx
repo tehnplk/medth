@@ -3,6 +3,8 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { Check, CheckCheck, Clock, Plus, User } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/auth";
 import { query } from "@/lib/db";
 import BookedDateInput from "@/components/booked-date-input";
 import BookingSlotButton from "@/components/booking-slot-button";
@@ -61,9 +63,29 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
   const dateParamRaw = getQueryValue(searchParams.date);
   const dateParam = /^\d{4}-\d{2}-\d{2}$/.test(dateParamRaw) ? dateParamRaw : bangkokTodayIso();
 
-  const branches = await query<BranchRow[]>(
-    "SELECT id, name FROM branches WHERE is_active = 1 AND is_deleted = 0 ORDER BY id ASC",
-  );
+  const session = await getServerSession(authOptions);
+  const role = (session?.user as { role?: string })?.role;
+  const userId = session?.user ? parseInt((session.user as { id?: string }).id ?? "0", 10) : null;
+
+  let branches: BranchRow[];
+  if (role === "admin") {
+    // Admin can see all branches
+    branches = await query<BranchRow[]>(
+      "SELECT id, name FROM branches WHERE is_active = 1 AND is_deleted = 0 ORDER BY id ASC",
+    );
+  } else if (userId && !isNaN(userId)) {
+    // Non-admin users only see assigned branches
+    branches = await query<BranchRow[]>(
+      `SELECT b.id, b.name
+       FROM branches b
+       INNER JOIN user_in_branch ub ON ub.branch_id = b.id
+       WHERE ub.user_id = ? AND b.is_active = 1 AND b.is_deleted = 0
+       ORDER BY b.id ASC`,
+      [userId],
+    );
+  } else {
+    branches = [];
+  }
 
   const parsedBranch = Number(branchParam);
   const branchId =
