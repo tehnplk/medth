@@ -3,7 +3,6 @@ import BookingTopBar from "@/components/booking-top-bar";
 import ConfirmBookingForm from "@/components/confirm-booking-form";
 import { query } from "@/lib/db";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 type SearchParams = Promise<{
@@ -74,6 +73,15 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
   const slotId = Number(slotParam);
   const staffId = Number(staffParam);
 
+  if (
+    !(Number.isFinite(branchId) && branchId > 0) ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(dateParam) ||
+    !(Number.isFinite(slotId) && slotId > 0) ||
+    !(Number.isFinite(staffId) && staffId > 0)
+  ) {
+    redirect("/booking");
+  }
+
   let hasDbError = false;
   let branchName = "-";
   let slotLabel = "-";
@@ -122,19 +130,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           [dateParam, slotId, staffId, branchId],
         );
         if (staffRows.length === 0) {
-          // If staff is not found, redirect back to staff list
-          const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`;
-          return (
-            <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-              <p className="mb-4 font-bold text-slate-700">ไม่พบพนักงานท่านนี้ กรุณาเลือกพนักงานใหม่</p>
-              <Link
-                href={redirectUrl}
-                className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
-              >
-                ย้อนกลับไปเลือกพนักงาน
-              </Link>
-            </div>
-          );
+          redirect(`/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`);
         }
         staffName = staffRows[0].full_name;
         staffCode = staffRows[0].staff_code;

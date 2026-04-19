@@ -3,6 +3,7 @@ import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
 import BookingTopBar from "@/components/booking-top-bar";
 import { Calendar, ChevronRight, Clock, MapPin } from "lucide-react";
+import { redirect } from "next/navigation";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -93,27 +94,36 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
   const branchId = Number(branchParam);
   const selectedSlotId = Number(slotParam);
 
+  if (!(Number.isFinite(branchId) && branchId > 0)) {
+    redirect("/booking");
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+    redirect(`/booking/date?branch=${branchId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`);
+  }
+
   let hasDbError = false;
   let branchName = "";
   let slots: TimeSlotRow[] = [];
   let isBranchDateOff = false;
 
-  if (Number.isFinite(branchId) && branchId > 0) {
-    try {
-      const branches = await query<BranchRow[]>(
-        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
+  try {
+    const branches = await query<BranchRow[]>(
+      "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
+      [branchId],
+    );
+    if (branches.length > 0) {
+      branchName = branches[0].name;
+      slots = await query<TimeSlotRow[]>(
+        "SELECT id, begin_time, end_time, 0 AS available_staff_count FROM time_slots WHERE branch_id = ? ORDER BY begin_time ASC",
         [branchId],
       );
-      if (branches.length > 0) {
-        branchName = branches[0].name;
-        slots = await query<TimeSlotRow[]>(
-          "SELECT id, begin_time, end_time, 0 AS available_staff_count FROM time_slots WHERE branch_id = ? ORDER BY begin_time ASC",
-          [branchId],
-        );
-      }
-    } catch {
-      hasDbError = true;
     }
+  } catch {
+    hasDbError = true;
+  }
+
+  if (!hasDbError && !branchName) {
+    redirect("/booking");
   }
 
   if (!hasDbError && branchName && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
@@ -222,13 +232,7 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
             </div>
           ) : null}
 
-          {!dateParam ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
-              <Calendar className="mb-4 h-12 w-12 opacity-20" />
-              <p className="font-medium">กรุณาเลือกวันที่ต้องการเข้ารับบริการก่อน</p>
-            </div>
-          ) : (
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {slots.length === 0 ? (
                 <div className="col-span-full py-20 text-center text-slate-500">
                    <Clock className="mx-auto mb-4 h-10 w-10 opacity-20" />
@@ -272,9 +276,9 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
                 );
               })}
             </section>
-          )}
         </div>
       </div>
     </>
   );
 }
+

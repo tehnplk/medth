@@ -4,6 +4,7 @@ import BookingTopBar from "@/components/booking-top-bar";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import StaffList from "@/components/staff-list";
 import SocketLiveRefresh from "@/components/socket-live-refresh";
+import { redirect } from "next/navigation";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -92,32 +93,39 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
   const branchId = Number(branchParam);
   const slotId = Number(slotParam);
 
+  if (!(Number.isFinite(branchId) && branchId > 0)) {
+    redirect("/booking");
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+    redirect(`/booking/date?branch=${branchId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`);
+  }
+  if (!(Number.isFinite(slotId) && slotId > 0)) {
+    redirect(`/booking/time?branch=${branchId}&date=${dateParam}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`);
+  }
+
   let hasDbError = false;
   let branchName = "";
   let slotLabel = "";
   let staffList: StaffRow[] = [];
 
-  if (Number.isFinite(branchId) && branchId > 0) {
-    try {
-      const branchRows = await query<BranchRow[]>(
-        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
-        [branchId],
-      );
-      if (branchRows.length > 0) {
-        branchName = branchRows[0].name;
-      }
+  try {
+    const branchRows = await query<BranchRow[]>(
+      "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
+      [branchId],
+    );
+    if (branchRows.length > 0) {
+      branchName = branchRows[0].name;
+    }
 
-      if (Number.isFinite(slotId) && slotId > 0) {
-        const slotRows = await query<TimeSlotRow[]>(
-          "SELECT id, begin_time, end_time FROM time_slots WHERE id = ? AND branch_id = ? LIMIT 1",
-          [slotId, branchId],
-        );
-        if (slotRows.length > 0) {
-          slotLabel = `${formatTime(slotRows[0].begin_time)} - ${formatTime(slotRows[0].end_time)}น.`;
-        }
-      }
+    const slotRows = await query<TimeSlotRow[]>(
+      "SELECT id, begin_time, end_time FROM time_slots WHERE id = ? AND branch_id = ? LIMIT 1",
+      [slotId, branchId],
+    );
+    if (slotRows.length > 0) {
+      slotLabel = `${formatTime(slotRows[0].begin_time)} - ${formatTime(slotRows[0].end_time)}น.`;
+    }
 
-      staffList = await query<StaffRow[]>(
+    staffList = await query<StaffRow[]>(
         `SELECT
            s.id,
            s.staff_code,
@@ -149,9 +157,12 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
          ORDER BY s.staff_code ASC`,
         [dateParam, slotId, dateParam, branchId],
       );
-    } catch {
-      hasDbError = true;
-    }
+  } catch {
+    hasDbError = true;
+  }
+
+  if (!hasDbError && (!branchName || !slotLabel)) {
+    redirect("/booking");
   }
 
   const thaiDateLabel = toThaiDateLabel(dateParam);
@@ -212,20 +223,13 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
             </div>
           ) : null}
 
-          {!slotLabel ? (
-             <div className="flex flex-col items-center justify-center py-20 text-center text-slate-500">
-                <Clock className="mb-4 h-12 w-12 opacity-20" />
-                <p className="font-medium">กรุณาเลือกช่วงเวลาที่ต้องการเข้ารับบริการก่อน</p>
-             </div>
-          ) : (
-            <StaffList
-              initialStaff={staffList}
-              branchId={branchId}
-              dateParam={dateParam}
-              slotId={slotId}
-              lineId={lineIdParam}
-            />
-          )}
+          <StaffList
+            initialStaff={staffList}
+            branchId={branchId}
+            dateParam={dateParam}
+            slotId={slotId}
+            lineId={lineIdParam}
+          />
         </div>
       </div>
     </>

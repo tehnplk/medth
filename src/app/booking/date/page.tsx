@@ -3,6 +3,7 @@ import { query } from "@/lib/db";
 import BookingSteps from "@/components/booking-steps";
 import BookingTopBar from "@/components/booking-top-bar";
 import { MapPin } from "lucide-react";
+import { redirect } from "next/navigation";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -119,21 +120,27 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
   const lineIdParam = getQueryValue(searchParams.line_id);
   const branchId = Number(branchParam);
 
+  if (!(Number.isFinite(branchId) && branchId > 0)) {
+    redirect("/booking");
+  }
+
   let hasDbError = false;
   let branchName = "";
 
-  if (Number.isFinite(branchId) && branchId > 0) {
-    try {
-      const branches = await query<BranchRow[]>(
-        "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
-        [branchId],
-      );
-      if (branches.length > 0) {
-        branchName = branches[0].name;
-      }
-    } catch {
-      hasDbError = true;
+  try {
+    const branches = await query<BranchRow[]>(
+      "SELECT id, name FROM branches WHERE id = ? AND is_active = 1 AND is_deleted = 0 LIMIT 1",
+      [branchId],
+    );
+    if (branches.length > 0) {
+      branchName = branches[0].name;
     }
+  } catch {
+    hasDbError = true;
+  }
+
+  if (!hasDbError && !branchName) {
+    redirect("/booking");
   }
 
   const dates = buildDateItems(14);
@@ -228,12 +235,6 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
           {hasDbError ? (
             <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-800 font-medium">
               โหลดข้อมูลวันที่ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
-            </div>
-          ) : null}
-
-          {!hasDbError && !branchName ? (
-            <div className="mb-6 rounded-2xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-800">
-              ไม่พบสาขาที่คุณเลือก กรุณากลับไปเลือกสาขาใหม่อีกครั้ง
             </div>
           ) : null}
 
