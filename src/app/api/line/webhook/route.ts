@@ -107,6 +107,71 @@ export async function POST(req: Request) {
           }
 
           if (text === "ประวัติการจอง") {
+            const searchUrl = "https://medthscphpl.online/booking/search-booking";
+
+            await client.replyMessage({
+              replyToken: event.replyToken,
+              messages: [
+                {
+                  type: "flex",
+                  altText: "เลือกวิธีค้นหาประวัติการจอง",
+                  contents: {
+                    type: "bubble",
+                    body: {
+                      type: "box",
+                      layout: "vertical",
+                      spacing: "md",
+                      contents: [
+                        {
+                          type: "text",
+                          text: "ประวัติการจอง",
+                          weight: "bold",
+                          size: "lg",
+                          color: "#1B4F72",
+                        },
+                        {
+                          type: "text",
+                          text: "เลือกวิธีดูประวัติการจองของคุณ",
+                          size: "sm",
+                          color: "#666666",
+                          wrap: true,
+                        },
+                      ],
+                    },
+                    footer: {
+                      type: "box",
+                      layout: "vertical",
+                      spacing: "sm",
+                      contents: [
+                        {
+                          type: "button",
+                          style: "primary",
+                          action: {
+                            type: "message",
+                            label: "รายการจองผ่านไลน์",
+                            text: "รายการจองผ่านไลน์",
+                          },
+                        },
+                        {
+                          type: "button",
+                          style: "secondary",
+                          action: {
+                            type: "uri",
+                            label: "ค้นด้วยเบอร์โทร",
+                            uri: searchUrl,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            });
+
+            return;
+          }
+
+          if (text === "รายการจองผ่านไลน์") {
             if (!lineId) {
               await client.replyMessage({
                 replyToken: event.replyToken,
@@ -118,6 +183,7 @@ export async function POST(req: Request) {
             const bookings = await query<any[]>(
               `SELECT
                 b.booking_code,
+                b.customer_name,
                 b.booking_date,
                 b.booking_status,
                 br.name AS branch_name,
@@ -166,6 +232,14 @@ export async function POST(req: Request) {
                   layout: "vertical",
                   spacing: "md",
                   contents: [
+                    {
+                      type: "box",
+                      layout: "horizontal",
+                      contents: [
+                        { type: "text", text: "ผู้จอง", color: "#aaaaaa", size: "sm", flex: 2 },
+                        { type: "text", text: b.customer_name || "-", size: "sm", color: "#333333", flex: 5, wrap: true, weight: "bold" },
+                      ],
+                    },
                     {
                       type: "box",
                       layout: "horizontal",
