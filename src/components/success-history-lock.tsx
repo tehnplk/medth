@@ -4,12 +4,10 @@ import { useEffect } from "react";
 
 export default function SuccessHistoryLock() {
   useEffect(() => {
-    const currentUrl = window.location.href;
-
-    window.history.pushState({ bookingSuccess: true }, "", currentUrl);
+    window.history.pushState({ bookingSuccess: true }, "", window.location.href);
 
     const handlePopState = () => {
-      window.history.pushState({ bookingSuccess: true }, "", currentUrl);
+      window.location.replace("/booking");
     };
 
     window.addEventListener("popstate", handlePopState);
