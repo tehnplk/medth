@@ -171,10 +171,11 @@ export async function POST(request: Request) {
     );
     const existingRows = rawExistingRows as BookingRow[];
 
-    const existingCode = existingRows[0]?.booking_code;
-    if (existingCode) {
+    if (existingRows.length > 0) {
+      // Staff is already booked by someone else, redirect back to staff selection
+      const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
       return NextResponse.redirect(
-        new URL(`/booking/success?booking_code=${encodeURIComponent(existingCode)}&branch=${branchId}`, baseUrl(request.url)),
+        new URL(`/booking/staff?branch=${branchId}&date=${bookingDate}&slot=${slotId}&error=booked${lineIdQuery}`, baseUrl(request.url)),
       );
     }
 
@@ -199,24 +200,11 @@ export async function POST(request: Request) {
     } catch (error) {
       const dbError = error as { code?: string; errno?: number };
       if (dbError.code === "ER_DUP_ENTRY" || dbError.errno === 1062) {
-        const [rawDuplicateRows] = await connection.query(
-          `SELECT booking_code
-           FROM bookings
-           WHERE branch_id = ?
-             AND booking_date = ?
-             AND time_slot_id = ?
-             AND staff_id = ?
-             AND is_deleted = 0
-           LIMIT 1`,
-          [branchId, bookingDate, slotId, staffId],
+        // Duplicate booking detected, redirect back to staff selection
+        const lineIdQuery = lineId ? `&line_id=${encodeURIComponent(lineId)}` : "";
+        return NextResponse.redirect(
+          new URL(`/booking/staff?branch=${branchId}&date=${bookingDate}&slot=${slotId}&error=booked${lineIdQuery}`, baseUrl(request.url)),
         );
-        const duplicateRows = rawDuplicateRows as BookingRow[];
-        const duplicateCode = duplicateRows[0]?.booking_code;
-        if (duplicateCode) {
-          return NextResponse.redirect(
-            new URL(`/booking/success?booking_code=${encodeURIComponent(duplicateCode)}&branch=${branchId}`, baseUrl(request.url)),
-          );
-        }
       }
       throw error;
     }

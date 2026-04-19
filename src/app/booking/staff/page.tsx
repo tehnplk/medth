@@ -10,6 +10,7 @@ type SearchParams = Promise<{
   date?: string | string[] | undefined;
   slot?: string | string[] | undefined;
   line_id?: string | string[] | undefined;
+  error?: string | string[] | undefined;
 }>;
 
 type BranchRow = {
@@ -84,6 +85,7 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
   const dateParam = getQueryValue(searchParams.date);
   const slotParam = getQueryValue(searchParams.slot);
   const lineIdParam = getQueryValue(searchParams.line_id);
+  const errorParam = getQueryValue(searchParams.error);
 
   const branchId = Number(branchParam);
   const slotId = Number(slotParam);
@@ -176,6 +178,11 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
 
       <div className="flex-1 overflow-y-auto bg-slate-50/50 px-4 py-6 sm:px-8">
         <div className="mx-auto max-w-4xl">
+          {errorParam === "booked" ? (
+            <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 font-medium">
+              ⚠️ พนักงานท่านนี้ถูกจองไปแล้ว กรุณาเลือกพนักงานท่านอื่น
+            </div>
+          ) : null}
           {hasDbError ? (
             <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-800 font-medium">
               โหลดข้อมูลพนักงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง

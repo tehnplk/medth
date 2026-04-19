@@ -9,6 +9,7 @@ type ConfirmBookingFormProps = {
   slot: string;
   staff: string;
   lineId: string;
+  isBooked: boolean;
 };
 
 export default function ConfirmBookingForm({
@@ -18,6 +19,7 @@ export default function ConfirmBookingForm({
   slot,
   staff,
   lineId,
+  isBooked,
 }: ConfirmBookingFormProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -38,6 +40,7 @@ export default function ConfirmBookingForm({
   }
 
   const canSubmit =
+    !isBooked &&
     bookingReady &&
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
@@ -59,6 +62,12 @@ export default function ConfirmBookingForm({
       <input type="hidden" name="slot" value={slot} />
       <input type="hidden" name="staff" value={staff} />
       <input type="hidden" name="line_id" value={lineId} />
+
+      {isBooked && (
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 font-medium">
+          ⚠️ พนักงานท่านนี้ถูกจองไปแล้ว กรุณาเลือกพนักงานท่านอื่น
+        </div>
+      )}
 
       <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm transition-all duration-300 focus-within:border-sky-300 focus-within:shadow-xl focus-within:shadow-sky-100">
         <h3 className="mb-6 text-xl font-black text-slate-900">ผู้จอง</h3>

@@ -15,7 +15,7 @@ type SearchParams = Promise<{
 
 type BranchRow = { id: number; name: string };
 type TimeSlotRow = { id: number; begin_time: string; end_time: string };
-type StaffRow = { id: number; full_name: string; is_booked: number };
+type StaffRow = { id: number; full_name: string; staff_code: string; is_booked: number };
 
 const thaiWeekdays = [
   "วันอาทิตย์",
@@ -77,6 +77,8 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
   let branchName = "-";
   let slotLabel = "-";
   let staffName = "-";
+  let staffCode = "-";
+  let staffIsBooked = 0;
 
   if (Number.isFinite(branchId) && branchId > 0) {
     try {
@@ -101,6 +103,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           `SELECT
              s.id,
              s.full_name,
+             s.staff_code,
              EXISTS(
                SELECT 1
                FROM bookings b
@@ -116,12 +119,12 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
            LIMIT 1`,
           [dateParam, slotId, staffId, branchId],
         );
-        if (staffRows.length === 0 || staffRows[0].is_booked === 1) {
-          // If staff is not found or already booked, redirect back to staff list
-          const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}&error=booked${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`;
+        if (staffRows.length === 0) {
+          // If staff is not found, redirect back to staff list
+          const redirectUrl = `/booking/staff?branch=${branchId}&date=${dateParam}&slot=${slotId}${lineIdParam ? `&line_id=${encodeURIComponent(lineIdParam)}` : ""}`;
           return (
             <div className="flex min-h-screen flex-col items-center justify-center p-4 text-center">
-              <p className="mb-4 font-bold text-slate-700">พนักงานท่านนี้ถูกจองไปแล้ว กรุณาเลือกพนักงานใหม่</p>
+              <p className="mb-4 font-bold text-slate-700">ไม่พบพนักงานท่านนี้ กรุณาเลือกพนักงานใหม่</p>
               <Link
                 href={redirectUrl}
                 className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sky-700"
@@ -132,6 +135,8 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           );
         }
         staffName = staffRows[0].full_name;
+        staffCode = staffRows[0].staff_code;
+        staffIsBooked = staffRows[0].is_booked;
       }
     } catch {
       hasDbError = true;
@@ -185,37 +190,33 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
             </div>
             
             <div className="p-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6">
                 <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                  <span className="flex items-center gap-2 text-base font-bold text-slate-900">
                     <MapPin className="h-3.5 w-3.5 text-sky-600" />
-                    สาขา
+                    {branchName}
                   </span>
-                  <p className="text-base font-bold text-slate-900">{branchName}</p>
                 </div>
                 
                 <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                  <span className="flex items-center gap-2 text-base font-bold text-slate-900">
                     <Calendar className="h-3.5 w-3.5 text-sky-600" />
-                    วันที่
+                    {thaiDateLabel}
                   </span>
-                  <p className="text-base font-bold text-slate-900">{thaiDateLabel}</p>
                 </div>
                 
                 <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                  <span className="flex items-center gap-2 text-base font-bold text-slate-900">
                     <Clock className="h-3.5 w-3.5 text-sky-600" />
-                    ช่วงเวลา
+                    {slotLabel}
                   </span>
-                  <p className="text-base font-bold text-slate-900">{slotLabel}</p>
                 </div>
                 
                 <div className="flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                  <span className="flex items-center gap-2 text-base font-bold text-slate-900">
                     <User className="h-3.5 w-3.5 text-sky-600" />
-                    พนักงาน
+                    {staffName} <span className="text-xs font-normal text-slate-500">({staffCode})</span>
                   </span>
-                  <p className="text-base font-bold text-slate-900">{staffName}</p>
                 </div>
               </div>
             </div>
@@ -229,6 +230,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
               slot={slotParam}
               staff={staffParam}
               lineId={lineIdParam}
+              isBooked={staffIsBooked === 1}
             />
           </div>
         </div>
