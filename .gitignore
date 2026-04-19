@@ -47,3 +47,11 @@ next-env.d.ts
 # claude / agent artifacts
 .claude/
 /deploy-doc
+
+# test artifacts
+tests/snapshots/
+tests/screenshots/
+tests/database/
+*.yml
+*.sql
+
