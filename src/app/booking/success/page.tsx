@@ -146,7 +146,7 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
                 <div className="p-6 sm:p-8">
                   <div className="mb-8 flex flex-col items-center">
                     <p className="text-xs font-black uppercase tracking-[0.1em] text-slate-500 sm:text-sm">รหัสการจอง</p>
-                    <p className="mt-1 text-lg font-bold tracking-tight text-slate-900 leading-tight break-all">{receipt.booking_code}</p>
+                    <p className="mt-1 text-lg font-bold tracking-tight text-slate-900 leading-tight whitespace-nowrap">{receipt.booking_code}</p>
                   </div>
                   
                   <div className="space-y-6">

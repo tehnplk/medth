@@ -1,9 +1,11 @@
 "use client";
 
 import { startTransition, useState } from "react";
-import { CalendarOff, ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { CalendarOff, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, User } from "lucide-react";
 import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
+import ImageUploader from "@/components/image-uploader";
 
 type StaffRow = {
   id: number;
@@ -432,6 +434,7 @@ export default function AdminStaffGrid({
         <table className="min-w-full divide-y divide-sky-100 text-sm">
           <thead className="bg-sky-50/80 text-left text-slate-600">
             <tr>
+              <th className="px-4 py-3 font-semibold">รูป</th>
               <th className="px-4 py-3 font-semibold">พนักงาน</th>
               <th className="px-4 py-3 font-semibold">สาขา</th>
               <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
@@ -443,6 +446,22 @@ export default function AdminStaffGrid({
           <tbody className="divide-y divide-sky-100 bg-white">
             {filteredRows.map((row) => (
               <tr key={row.id} className="align-top text-slate-700">
+                <td className="px-4 py-3">
+                  <div className="relative h-12 w-12 overflow-hidden rounded-full border border-sky-100 bg-slate-50 flex items-center justify-center text-slate-400">
+                    {row.photo_path ? (
+                      <Image
+                        src={row.photo_path}
+                        alt={row.full_name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <User className="h-5 w-5" />
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                     {row.staff_code}
@@ -556,14 +575,14 @@ export default function AdminStaffGrid({
                 className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
               />
             </label>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-slate-700">Photo path</span>
-              <input
+            <div className="block">
+              <ImageUploader
                 value={form.photo_path}
-                onChange={(event) => updateForm("photo_path", event.target.value)}
-                className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+                onChange={(path) => updateForm("photo_path", path)}
+                kind="staff"
+                label="รูปพนักงาน"
               />
-            </label>
+            </div>
             <label className="block md:col-span-2">
               <span className="mb-1.5 block text-sm font-medium text-slate-700">ทักษะ</span>
               <input

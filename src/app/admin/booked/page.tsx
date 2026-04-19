@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Check, CheckCheck, Clock, Plus } from "lucide-react";
+import Image from "next/image";
+import { Check, CheckCheck, Clock, Plus, User } from "lucide-react";
 import { query } from "@/lib/db";
 import BookedDateInput from "@/components/booked-date-input";
 import BookingSlotButton from "@/components/booking-slot-button";
@@ -15,7 +16,7 @@ type SearchParams = Promise<{
 
 type BranchRow = { id: number; name: string };
 type TimeSlotRow = { id: number; begin_time: string; end_time: string };
-type StaffRow = { id: number; full_name: string; staff_code: string };
+type StaffRow = { id: number; full_name: string; staff_code: string; photo_path: string | null };
 type BookingStatus = "pending" | "confirmed" | "completed";
 type BookingRow = {
   id: number;
@@ -76,7 +77,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
         [branchId],
       ),
       query<StaffRow[]>(
-        `SELECT id, full_name, staff_code
+        `SELECT id, full_name, staff_code, photo_path
            FROM staff
            WHERE branch_id = ? AND status = 'active' AND is_deleted = 0
            ORDER BY staff_code ASC`,
@@ -204,9 +205,25 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
                   return (
                     <tr key={s.id} className="odd:bg-white even:bg-sky-50/40">
                       <td className="sticky left-0 border-b border-sky-100 bg-inherit px-3 py-2 font-medium text-slate-900">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-slate-500">{s.staff_code}</span>
-                          <span>{s.full_name}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-sky-100 bg-slate-50 flex items-center justify-center text-slate-400">
+                            {s.photo_path ? (
+                              <Image
+                                src={s.photo_path}
+                                alt={s.full_name}
+                                fill
+                                sizes="36px"
+                                className="object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <User className="h-4 w-4" />
+                            )}
+                          </div>
+                          <div className="flex min-w-0 flex-col">
+                            <span className="text-[8px] leading-tight text-slate-400">{s.staff_code}</span>
+                            <span className="truncate">{s.full_name}</span>
+                          </div>
                         </div>
                       </td>
                       {timeSlots.map((t) => {

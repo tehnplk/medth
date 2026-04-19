@@ -9,12 +9,13 @@ type BranchRow = {
   location_detail: string | null;
   opening_hours: string | null;
   coordinates: string | null;
+  cover_image: string | null;
   is_active: number;
 };
 
 export default async function AdminBranchesPage() {
   const branches = await query<BranchRow[]>(
-    `SELECT id, name, location_detail, opening_hours, coordinates, is_active
+    `SELECT id, name, location_detail, opening_hours, coordinates, cover_image, is_active
      FROM branches
      WHERE is_deleted = 0
      ORDER BY id ASC`,

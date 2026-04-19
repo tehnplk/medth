@@ -8,6 +8,7 @@ type BranchRow = {
   location_detail: string | null;
   opening_hours: string | null;
   coordinates: string | null;
+  cover_image: string | null;
   is_active: number;
 };
 
@@ -26,7 +27,7 @@ function normalizeActive(value: unknown) {
 
 async function getBranchById(id: number) {
   const rows = await query<BranchRow[]>(
-    `SELECT id, name, location_detail, opening_hours, coordinates, is_active
+    `SELECT id, name, location_detail, opening_hours, coordinates, cover_image, is_active
      FROM branches
      WHERE id = ?
        AND is_deleted = 0
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
     const locationDetail = normalizeNullableString(body.location_detail);
     const openingHours = normalizeNullableString(body.opening_hours);
     const coordinates = normalizeNullableString(body.coordinates);
+    const coverImage = normalizeNullableString(body.cover_image);
     const isActive = normalizeActive(body.is_active);
 
     if (!name) {
@@ -51,9 +53,9 @@ export async function POST(request: Request) {
     }
 
     const result = await query<mysql.ResultSetHeader>(
-      `INSERT INTO branches (name, location_detail, opening_hours, coordinates, is_active)
-       VALUES (?, ?, ?, ?, ?)`,
-      [name, locationDetail, openingHours, coordinates, isActive],
+      `INSERT INTO branches (name, location_detail, opening_hours, coordinates, cover_image, is_active)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [name, locationDetail, openingHours, coordinates, coverImage, isActive],
     );
 
     const row = await getBranchById(result.insertId);

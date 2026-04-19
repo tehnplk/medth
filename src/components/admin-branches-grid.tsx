@@ -1,9 +1,11 @@
 "use client";
 
 import { startTransition, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { ImageOff, Pencil, Plus, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
+import ImageUploader from "@/components/image-uploader";
 
 type BranchRow = {
   id: number;
@@ -11,6 +13,7 @@ type BranchRow = {
   location_detail: string | null;
   opening_hours: string | null;
   coordinates: string | null;
+  cover_image: string | null;
   is_active: number;
 };
 
@@ -19,6 +22,7 @@ type BranchForm = {
   location_detail: string;
   opening_hours: string;
   coordinates: string;
+  cover_image: string;
   is_active: string;
 };
 
@@ -31,6 +35,7 @@ const emptyForm: BranchForm = {
   location_detail: "",
   opening_hours: "",
   coordinates: "",
+  cover_image: "",
   is_active: "1",
 };
 
@@ -48,6 +53,7 @@ function toForm(row: BranchRow): BranchForm {
     location_detail: row.location_detail ?? "",
     opening_hours: row.opening_hours ?? "",
     coordinates: row.coordinates ?? "",
+    cover_image: row.cover_image ?? "",
     is_active: String(row.is_active),
   };
 }
@@ -199,6 +205,7 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
         <table className="min-w-full divide-y divide-sky-100 text-sm">
           <thead className="bg-sky-50/80 text-left text-slate-600">
             <tr>
+              <th className="px-4 py-3 font-semibold">รูปปก</th>
               <th className="px-4 py-3 font-semibold">ชื่อสาขา</th>
               <th className="px-4 py-3 font-semibold">โซนที่ตั้ง</th>
               <th className="px-4 py-3 font-semibold">เวลาเปิด-ปิด</th>
@@ -210,6 +217,22 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
           <tbody className="divide-y divide-sky-100 bg-white">
             {rows.map((row) => (
               <tr key={row.id} className="align-top text-slate-700">
+                <td className="px-4 py-3">
+                  <div className="relative h-12 w-20 overflow-hidden rounded-lg border border-sky-100 bg-slate-50 flex items-center justify-center text-slate-400">
+                    {row.cover_image ? (
+                      <Image
+                        src={row.cover_image}
+                        alt={row.name}
+                        fill
+                        sizes="80px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <ImageOff className="h-5 w-5" />
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3 font-medium text-slate-900">{row.name}</td>
                 <td className="px-4 py-3">{row.location_detail ?? "-"}</td>
                 <td className="px-4 py-3">{row.opening_hours ?? "-"}</td>
@@ -302,6 +325,15 @@ export default function AdminBranchesGrid({ initialRows }: { initialRows: Branch
                 className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
               />
             </label>
+            <div className="block md:col-span-2">
+              <ImageUploader
+                value={form.cover_image}
+                onChange={(path) => updateForm("cover_image", path)}
+                kind="branch"
+                label="รูปปกสาขา"
+                previewClassName="h-24 w-40"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2">
