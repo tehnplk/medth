@@ -9,11 +9,16 @@ type StaffRow = {
   staff_code: string;
   full_name: string;
   phone: string | null;
+  gender: "male" | "female" | "other";
   photo_path: string | null;
   skill_note: string | null;
   status: "active" | "inactive";
   branch_name: string;
 };
+
+function normalizeGender(value: unknown): "male" | "female" | "other" {
+  return value === "male" || value === "female" ? value : "other";
+}
 
 function parseId(value: string) {
   const id = Number(value);
@@ -46,6 +51,7 @@ async function getStaffById(id: number) {
        s.staff_code,
        s.full_name,
        s.phone,
+       s.gender,
        s.photo_path,
        s.skill_note,
        s.status,
@@ -79,6 +85,7 @@ export async function PATCH(
     const staffCode = normalizeString(body.staff_code);
     const fullName = normalizeString(body.full_name);
     const phone = normalizeNullableString(body.phone);
+    const gender = normalizeGender(body.gender);
     const photoPath = normalizeNullableString(body.photo_path);
     const skillNote = normalizeNullableString(body.skill_note);
     const status = normalizeStatus(body.status);
@@ -120,10 +127,10 @@ export async function PATCH(
 
     const result = await query<mysql.ResultSetHeader>(
       `UPDATE staff
-       SET branch_id = ?, staff_code = ?, full_name = ?, phone = ?, photo_path = ?, skill_note = ?, status = ?
+       SET branch_id = ?, staff_code = ?, full_name = ?, phone = ?, gender = ?, photo_path = ?, skill_note = ?, status = ?
        WHERE id = ?
          AND is_deleted = 0`,
-      [branchId, staffCode, fullName, phone, photoPath, skillNote, status, id],
+      [branchId, staffCode, fullName, phone, gender, photoPath, skillNote, status, id],
     );
 
     if (result.affectedRows === 0) {

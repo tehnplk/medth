@@ -9,6 +9,7 @@ type StaffRow = {
   full_name: string;
   staff_code: string;
   phone: string | null;
+  gender: "male" | "female" | "other";
   photo_path: string | null;
   skill_note: string | null;
   status: "active" | "inactive";
@@ -29,6 +30,7 @@ export default async function AdminStaffPage() {
          s.full_name,
          s.staff_code,
          s.phone,
+         s.gender,
          s.photo_path,
          s.skill_note,
          s.status,

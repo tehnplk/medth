@@ -23,6 +23,8 @@ type StaffRow = {
   staff_code: string;
   full_name: string;
   phone: string | null;
+  gender: "male" | "female" | "other";
+  photo_path: string | null;
   skill_note: string | null;
   status: "active" | "inactive";
   is_booked: number;
@@ -121,6 +123,8 @@ export default async function StaffPage(props: { searchParams: SearchParams }) {
            s.staff_code,
            s.full_name,
            s.phone,
+           s.gender,
+           s.photo_path,
            s.skill_note,
            s.status,
            EXISTS(

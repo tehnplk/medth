@@ -8,11 +8,16 @@ type StaffRow = {
   staff_code: string;
   full_name: string;
   phone: string | null;
+  gender: "male" | "female" | "other";
   photo_path: string | null;
   skill_note: string | null;
   status: "active" | "inactive";
   branch_name: string;
 };
+
+function normalizeGender(value: unknown): "male" | "female" | "other" {
+  return value === "male" || value === "female" ? value : "other";
+}
 
 function normalizeString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -40,6 +45,7 @@ async function getStaffById(id: number) {
        s.staff_code,
        s.full_name,
        s.phone,
+       s.gender,
        s.photo_path,
        s.skill_note,
        s.status,
@@ -63,6 +69,7 @@ export async function POST(request: Request) {
     const staffCode = normalizeString(body.staff_code);
     const fullName = normalizeString(body.full_name);
     const phone = normalizeNullableString(body.phone);
+    const gender = normalizeGender(body.gender);
     const photoPath = normalizeNullableString(body.photo_path);
     const skillNote = normalizeNullableString(body.skill_note);
     const status = normalizeStatus(body.status);
@@ -102,9 +109,9 @@ export async function POST(request: Request) {
     }
 
     const result = await query<mysql.ResultSetHeader>(
-      `INSERT INTO staff (branch_id, staff_code, full_name, phone, photo_path, skill_note, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [branchId, staffCode, fullName, phone, photoPath, skillNote, status],
+      `INSERT INTO staff (branch_id, staff_code, full_name, phone, gender, photo_path, skill_note, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [branchId, staffCode, fullName, phone, gender, photoPath, skillNote, status],
     );
 
     const row = await getStaffById(result.insertId);

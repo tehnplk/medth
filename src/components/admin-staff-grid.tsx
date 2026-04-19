@@ -13,10 +13,17 @@ type StaffRow = {
   full_name: string;
   staff_code: string;
   phone: string | null;
+  gender: "male" | "female" | "other";
   photo_path: string | null;
   skill_note: string | null;
   status: "active" | "inactive";
   branch_name: string;
+};
+
+const genderLabels: Record<StaffRow["gender"], string> = {
+  male: "ชาย",
+  female: "หญิง",
+  other: "ไม่ระบุ",
 };
 
 type BranchOption = {
@@ -29,6 +36,7 @@ type StaffForm = {
   staff_code: string;
   full_name: string;
   phone: string;
+  gender: "male" | "female" | "other";
   photo_path: string;
   skill_note: string;
   status: "active" | "inactive";
@@ -90,6 +98,7 @@ const emptyForm: StaffForm = {
   staff_code: "",
   full_name: "",
   phone: "",
+  gender: "other",
   photo_path: "",
   skill_note: "",
   status: "active",
@@ -109,6 +118,7 @@ function toForm(row: StaffRow): StaffForm {
     staff_code: row.staff_code,
     full_name: row.full_name,
     phone: row.phone ?? "",
+    gender: row.gender,
     photo_path: row.photo_path ?? "",
     skill_note: row.skill_note ?? "",
     status: row.status,
@@ -437,6 +447,7 @@ export default function AdminStaffGrid({
               <th className="px-4 py-3 font-semibold">รูป</th>
               <th className="px-4 py-3 font-semibold">พนักงาน</th>
               <th className="px-4 py-3 font-semibold">สาขา</th>
+              <th className="px-4 py-3 font-semibold">เพศ</th>
               <th className="px-4 py-3 font-semibold">เบอร์โทร</th>
               <th className="px-4 py-3 font-semibold">ทักษะ</th>
               <th className="px-4 py-3 font-semibold">สถานะ</th>
@@ -469,6 +480,7 @@ export default function AdminStaffGrid({
                   <p className="mt-1 font-medium text-slate-900">{row.full_name}</p>
                 </td>
                 <td className="px-4 py-3">{row.branch_name}</td>
+                <td className="px-4 py-3">{genderLabels[row.gender]}</td>
                 <td className="px-4 py-3">{row.phone ?? "-"}</td>
                 <td className="px-4 py-3">{row.skill_note ?? "-"}</td>
                 <td className="px-4 py-3">
@@ -566,6 +578,20 @@ export default function AdminStaffGrid({
                 onChange={(event) => updateForm("full_name", event.target.value)}
                 className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
               />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-slate-700">เพศ</span>
+              <select
+                value={form.gender}
+                onChange={(event) =>
+                  updateForm("gender", event.target.value as StaffForm["gender"])
+                }
+                className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+              >
+                <option value="male">ชาย</option>
+                <option value="female">หญิง</option>
+                <option value="other">ไม่ระบุ</option>
+              </select>
             </label>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-slate-700">เบอร์โทร</span>
