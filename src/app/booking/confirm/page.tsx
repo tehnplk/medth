@@ -4,6 +4,7 @@ import ConfirmBookingForm from "@/components/confirm-booking-form";
 import { query } from "@/lib/db";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -79,6 +80,7 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
   let staffName = "-";
   let staffCode = "-";
   let staffIsBooked = 0;
+  let ownBookingCode = "";
 
   if (Number.isFinite(branchId) && branchId > 0) {
     try {
@@ -137,10 +139,34 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
         staffName = staffRows[0].full_name;
         staffCode = staffRows[0].staff_code;
         staffIsBooked = staffRows[0].is_booked;
+
+        if (staffIsBooked === 1 && lineIdParam) {
+          const ownRows = await query<{ booking_code: string }[]>(
+            `SELECT booking_code
+             FROM bookings
+             WHERE branch_id = ?
+               AND booking_date = ?
+               AND time_slot_id = ?
+               AND staff_id = ?
+               AND line_id = ?
+               AND is_deleted = 0
+             LIMIT 1`,
+            [branchId, dateParam, slotId, staffId, lineIdParam],
+          );
+          if (ownRows.length > 0) {
+            ownBookingCode = ownRows[0].booking_code;
+          }
+        }
       }
     } catch {
       hasDbError = true;
     }
+  }
+
+  if (ownBookingCode) {
+    redirect(
+      `/booking/success?booking_code=${encodeURIComponent(ownBookingCode)}&branch=${branchId}`,
+    );
   }
 
   const thaiDateLabel = toThaiDateLabel(dateParam);
