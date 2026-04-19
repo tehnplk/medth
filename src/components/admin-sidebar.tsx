@@ -41,7 +41,7 @@ const menuItems = [
   },
   {
     href: "/admin/time-slots",
-    label: "จัดการเวลาจอง",
+    label: "จัดการเวลาเปิดทำการ",
     description: "ช่วงเวลาเปิดรับจอง",
     icon: CalendarClock,
   },
