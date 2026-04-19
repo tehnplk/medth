@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitBooking } from "@/app/booking/confirm/actions";
 
 type ConfirmBookingFormProps = {
   bookingReady: boolean;
@@ -52,8 +53,7 @@ export default function ConfirmBookingForm({
 
   return (
     <form
-      action="/booking/confirm/submit"
-      method="POST"
+      action={submitBooking}
       onSubmit={handleSubmit}
       className="mt-6 space-y-6"
     >
