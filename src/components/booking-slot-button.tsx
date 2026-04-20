@@ -88,19 +88,19 @@ export default function BookingSlotButton({
     if (saving) return;
 
     const result = await Swal.fire({
-      title: "ยืนยันการลบ",
-      text: `ลบการจอง ${bookingCode} ใช่หรือไม่`,
+      title: "ยืนยันการยกเลิก",
+      text: `ยกเลิกการจอง ${bookingCode} ใช่หรือไม่`,
       input: "textarea",
-      inputLabel: "เหตุผลการลบ",
-      inputPlaceholder: "กรอกเหตุผลการลบ",
+      inputLabel: "เหตุผลการยกเลิก",
+      inputPlaceholder: "กรอกเหตุผลการยกเลิก",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "ลบ",
-      cancelButtonText: "ยกเลิก",
+      confirmButtonText: "ยกเลิกการจอง",
+      cancelButtonText: "กลับ",
       inputValidator: (value) => {
-        if (!value || !String(value).trim()) return "กรุณาระบุเหตุผลการลบ";
+        if (!value || !String(value).trim()) return "กรุณาระบุเหตุผลการยกเลิก";
         return null;
       },
     });
@@ -190,7 +190,7 @@ export default function BookingSlotButton({
               className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:opacity-60"
             >
               <Trash2 className="h-4 w-4" />
-              ลบการจอง
+              ยกเลิกการจอง
             </button>
 
             <div className="flex items-center gap-2">
