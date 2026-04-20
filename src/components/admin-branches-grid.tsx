@@ -159,7 +159,6 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "ลบ",
-      confirmButtonText: "ลบ",
       cancelButtonText: "ยกเลิก",
     });
     if (!result.isConfirmed) return;
