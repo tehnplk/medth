@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     const row = await getBranchById(result.insertId);
     return NextResponse.json({ row }, { status: 201 });
-  } catch {
+  } catch (error) {
     return NextResponse.json({ error: "ไม่สามารถเพิ่มสาขาได้" }, { status: 500 });
   }
 }

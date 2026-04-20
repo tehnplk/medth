@@ -133,7 +133,6 @@ export default function AdminStaffGrid({
   branches: BranchOption[];
 }) {
   const [rows, setRows] = useState(initialRows);
-  const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [editingRow, setEditingRow] = useState<StaffRow | null>(null);
   const [selectedBranchId, setSelectedBranchId] = useState<number>(
@@ -273,14 +272,12 @@ export default function AdminStaffGrid({
       ...emptyForm,
       branch_id: selectedBranchId ? String(selectedBranchId) : (branches[0] ? String(branches[0].id) : ""),
     });
-    setError("");
     setOpen(true);
   }
 
   function openEditModal(row: StaffRow) {
     setEditingRow(row);
     setForm(toForm(row));
-    setError("");
     setOpen(true);
   }
 
@@ -288,7 +285,6 @@ export default function AdminStaffGrid({
     if (isSaving) return;
     setOpen(false);
     setEditingRow(null);
-    setError("");
   }
 
   function updateForm<Key extends keyof StaffForm>(key: Key, value: StaffForm[Key]) {
@@ -297,7 +293,6 @@ export default function AdminStaffGrid({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
     setIsSaving(true);
 
     try {
@@ -329,7 +324,12 @@ export default function AdminStaffGrid({
 
       closeModal();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "บันทึกข้อมูลไม่สำเร็จ");
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: submitError instanceof Error ? submitError.message : "บันทึกข้อมูลไม่สำเร็จ",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -364,13 +364,17 @@ export default function AdminStaffGrid({
     if (!result.isConfirmed) return;
 
     try {
-      setError("");
       await requestJson<{ success: true }>(`/api/admin/staff/${row.id}`, { method: "DELETE" });
       startTransition(() => {
         setRows((current) => current.filter((item) => item.id !== row.id));
       });
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "ลบข้อมูลไม่สำเร็จ");
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: deleteError instanceof Error ? deleteError.message : "ลบข้อมูลไม่สำเร็จ",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
     }
   }
 
@@ -434,12 +438,6 @@ export default function AdminStaffGrid({
         </div>
       </div>
 
-      {error ? (
-        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
-
       <div className="mt-5 overflow-x-auto rounded-2xl border border-sky-100">
         <table className="min-w-full divide-y divide-sky-100 text-sm">
           <thead className="bg-sky-50/80 text-left text-slate-600">
@@ -474,9 +472,9 @@ export default function AdminStaffGrid({
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <span className="inline-block rounded-md border border-sky-100 bg-sky-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-700 shadow-sm">
                     {row.staff_code}
-                  </p>
+                  </span>
                   <p className="mt-1 font-medium text-slate-900">{row.full_name}</p>
                 </td>
                 <td className="px-4 py-3">{row.branch_name}</td>
@@ -712,7 +710,7 @@ export default function AdminStaffGrid({
                     disabled={isExisting}
                     className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-sm transition
                       ${isExisting ? "cursor-not-allowed bg-red-100 text-red-400" : ""}
-                      ${isSelected && !isExisting ? "bg-amber-500 font-semibold text-white" : ""}
+                      ${isSelected && !isExisting ? "bg-sky-600 font-semibold text-white" : ""}
                       ${!isSelected && !isExisting ? "hover:bg-sky-100 text-slate-700" : ""}
                     `}
                   >
@@ -730,13 +728,13 @@ export default function AdminStaffGrid({
               {selectedDates.sort().map((d) => (
                 <span
                   key={d}
-                  className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700"
+                  className="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700"
                 >
                   {formatThaiDate(d)}
                   <button
                     type="button"
                     onClick={() => toggleDate(d)}
-                    className="ml-0.5 text-amber-500 hover:text-amber-700"
+                    className="ml-0.5 text-sky-500 hover:text-sky-700"
                   >
                     ×
                   </button>
@@ -779,7 +777,7 @@ export default function AdminStaffGrid({
             <button
               type="submit"
               disabled={leaveSaving || selectedDates.length === 0}
-              className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 disabled:opacity-50"
             >
               <Plus className="h-4 w-4" />
               {leaveSaving
@@ -809,7 +807,7 @@ export default function AdminStaffGrid({
                   <tr key={leave.id} className="text-slate-700">
                     <td className="px-4 py-3">{formatThaiDate(leave.leave_date)}</td>
                     <td className="px-4 py-3">
-                      <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                      <span className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
                         {leaveTypeLabels[leave.leave_type]}
                       </span>
                     </td>

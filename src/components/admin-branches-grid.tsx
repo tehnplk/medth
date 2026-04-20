@@ -60,7 +60,6 @@ function toForm(row: BranchRow): BranchForm {
 
 export default function AdminBranchesGrid({ initialRows, userRole }: { initialRows: BranchRow[]; userRole: string }) {
   const [rows, setRows] = useState(initialRows);
-  const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [editingRow, setEditingRow] = useState<BranchRow | null>(null);
   const [form, setForm] = useState<BranchForm>(emptyForm);
@@ -69,14 +68,12 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
   function openCreateModal() {
     setEditingRow(null);
     setForm(emptyForm);
-    setError("");
     setOpen(true);
   }
 
   function openEditModal(row: BranchRow) {
     setEditingRow(row);
     setForm(toForm(row));
-    setError("");
     setOpen(true);
   }
 
@@ -85,7 +82,6 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
     setOpen(false);
     setEditingRow(null);
     setForm(emptyForm);
-    setError("");
   }
 
   function updateForm<Key extends keyof BranchForm>(key: Key, value: BranchForm[Key]) {
@@ -95,7 +91,6 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
-    setError("");
 
     try {
       const payload = { ...form, is_active: Number(form.is_active) };
@@ -129,7 +124,12 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
 
       closeModal();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "บันทึกข้อมูลไม่สำเร็จ");
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: submitError instanceof Error ? submitError.message : "บันทึกข้อมูลไม่สำเร็จ",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -159,12 +159,12 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "ลบ",
+      confirmButtonText: "ลบ",
       cancelButtonText: "ยกเลิก",
     });
     if (!result.isConfirmed) return;
 
     try {
-      setError("");
       await requestJson<{ success: true }>(`/api/admin/branches/${row.id}`, {
         method: "DELETE",
       });
@@ -172,7 +172,12 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
         setRows((current) => current.filter((item) => item.id !== row.id));
       });
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "ลบข้อมูลไม่สำเร็จ");
+      Swal.fire({
+        title: "เกิดข้อผิดพลาด",
+        text: deleteError instanceof Error ? deleteError.message : "ลบข้อมูลไม่สำเร็จ",
+        icon: "error",
+        confirmButtonText: "ตกลง",
+      });
     }
   }
 
@@ -196,12 +201,6 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
           </button>
         )}
       </div>
-
-      {error ? (
-        <p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
 
       <div className="mt-5 overflow-x-auto rounded-2xl border border-sky-100">
         <table className="min-w-full divide-y divide-sky-100 text-sm">
@@ -247,7 +246,7 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
                         : "bg-zinc-200 text-zinc-600"
                     }`}
                   >
-                    {row.is_active === 1 ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                    {row.is_active === 1 ? "ON - เปิดบริการ" : "OFF - ปิดบริการ"}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -281,12 +280,13 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
       <AdminModal
         open={open}
         onClose={closeModal}
+        maxWidth="max-w-4xl"
         title={editingRow ? "แก้ไขข้อมูลสาขา" : "เพิ่มสาขา"}
         description="บันทึกรายละเอียดสาขาเพื่อใช้ในหน้าจองและหน้าจัดการ"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <label className="block">
+            <label className="block md:col-span-2">
               <span className="mb-1.5 block text-sm font-medium text-slate-700">ชื่อสาขา</span>
               <input
                 value={form.name}
@@ -301,11 +301,11 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
                 onChange={(event) => updateForm("is_active", event.target.value)}
                 className="w-full rounded-2xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
               >
-                <option value="1">เปิดใช้งาน</option>
-                <option value="0">ปิดใช้งาน</option>
+                <option value="1">ON - เปิดบริการ</option>
+                <option value="0">OFF - ปิดบริการ</option>
               </select>
             </label>
-            <label className="block md:col-span-2">
+            <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-slate-700">โซนที่ตั้ง</span>
               <input
                 value={form.location_detail}

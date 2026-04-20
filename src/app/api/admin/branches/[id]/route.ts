@@ -82,7 +82,7 @@ export async function PATCH(
 
     const row = await getBranchById(id);
     return NextResponse.json({ row });
-  } catch {
+  } catch (error) {
     return NextResponse.json({ error: "ไม่สามารถแก้ไขสาขาได้" }, { status: 500 });
   }
 }

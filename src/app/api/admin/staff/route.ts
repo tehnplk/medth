@@ -90,10 +90,9 @@ export async function POST(request: Request) {
       query<Array<{ total: number }>>(
         `SELECT COUNT(*) AS total
          FROM staff
-         WHERE branch_id = ?
-           AND staff_code = ?
+         WHERE staff_code = ?
            AND is_deleted = 0`,
-        [branchId, staffCode],
+        [staffCode],
       ),
     ]);
 
@@ -103,7 +102,7 @@ export async function POST(request: Request) {
 
     if ((duplicateRows[0]?.total ?? 0) > 0) {
       return NextResponse.json(
-        { error: "รหัสพนักงานซ้ำในสาขาเดียวกัน" },
+        { error: "รหัสพนักงานนี้ถูกใช้งานแล้ว" },
         { status: 409 },
       );
     }
@@ -117,6 +116,12 @@ export async function POST(request: Request) {
     const row = await getStaffById(result.insertId);
     return NextResponse.json({ row }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ER_DUP_ENTRY") {
+      return NextResponse.json(
+        { error: "รหัสพนักงานนี้ถูกใช้งานแล้ว" },
+        { status: 409 },
+      );
+    }
     return NextResponse.json({ error: "ไม่สามารถเพิ่มพนักงานได้" }, { status: 500 });
   }
 }
