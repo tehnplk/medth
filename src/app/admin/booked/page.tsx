@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import Image from "next/image";
-import { Check, CheckCheck, Clock, Plus, User } from "lucide-react";
+import { Check, CheckCheck, Clock, FileSpreadsheet, Plus, User } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/auth";
 import { query } from "@/lib/db";
@@ -175,7 +175,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 space-y-3">
           <div className="flex flex-wrap gap-2">
             {branches.map((b) => {
               const isActive = b.id === branchId;
@@ -194,7 +194,18 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
               );
             })}
           </div>
-          <BookedDateInput branchId={branchId} defaultValue={dateParam} />
+          <div className="flex flex-wrap items-center gap-3">
+            <BookedDateInput branchId={branchId} defaultValue={dateParam} />
+            {branchId > 0 ? (
+              <a
+                href={`/api/admin/bookings/export?branch_id=${branchId}&book_date=${dateParam}`}
+                className="ml-auto inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100"
+              >
+                <FileSpreadsheet className="h-4 w-4" />
+                ส่งออก Excel
+              </a>
+            ) : null}
+          </div>
         </div>
       </section>
 

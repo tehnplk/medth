@@ -20,7 +20,8 @@
     "react-dom": "19.2.4",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
-    "sweetalert2": "^11.26.24"
+    "sweetalert2": "^11.26.24",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
