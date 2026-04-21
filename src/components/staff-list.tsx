@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, User, X } from "lucide-react";
+import { resolveImageSrc } from "@/lib/image-path";
 
 type StaffRow = {
   id: number;
@@ -107,9 +108,9 @@ export default function StaffList({ initialStaff, branchId, dateParam, slotId, l
                           : "bg-slate-100 text-slate-400"
                     }`}
                   >
-                    {staff.photo_path ? (
+                    {resolveImageSrc(staff.photo_path) ? (
                       <Image
-                        src={staff.photo_path}
+                        src={resolveImageSrc(staff.photo_path)}
                         alt={staff.full_name}
                         fill
                         sizes="56px"

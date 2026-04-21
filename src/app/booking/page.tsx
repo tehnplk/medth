@@ -6,6 +6,7 @@ import BookingTopBar from "@/components/booking-top-bar";
 import BranchDistance from "@/components/branch-distance";
 import ThumbnailPlaceholder from "@/components/thumbnail-placeholder";
 import { Clock, MapPin } from "lucide-react";
+import { resolveImageSrc } from "@/lib/image-path";
 
 
 type BranchRow = {
@@ -109,9 +110,9 @@ export default async function Home(props: { searchParams: SearchParams }) {
                 className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl hover:shadow-sky-100 active:scale-[0.98]"
               >
                 <div className="relative h-24 w-full overflow-hidden bg-slate-100">
-                   {branch.coverImage ? (
+                   {resolveImageSrc(branch.coverImage) ? (
                      <Image
-                       src={branch.coverImage}
+                       src={resolveImageSrc(branch.coverImage)}
                        alt={branch.name}
                        fill
                        sizes="(min-width: 640px) 50vw, 100vw"

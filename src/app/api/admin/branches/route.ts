@@ -1,6 +1,7 @@
 import type mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { normalizeImagePathForStorage } from "@/lib/image-path";
 
 type BranchRow = {
   id: number;
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     const locationDetail = normalizeNullableString(body.location_detail);
     const openingHours = normalizeNullableString(body.opening_hours);
     const coordinates = normalizeNullableString(body.coordinates);
-    const coverImage = normalizeNullableString(body.cover_image);
+    const coverImage = normalizeImagePathForStorage(body.cover_image);
     const isActive = normalizeActive(body.is_active);
 
     if (!name) {

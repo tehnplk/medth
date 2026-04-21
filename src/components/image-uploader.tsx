@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
+import { resolveImageSrc } from "@/lib/image-path";
 
 type Props = {
   value: string;
@@ -22,6 +23,7 @@ export default function ImageUploader({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
+  const previewSrc = resolveImageSrc(value);
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -64,9 +66,9 @@ export default function ImageUploader({
         <div
           className={`relative ${previewSize} overflow-hidden rounded-2xl border border-sky-200 bg-slate-50 flex items-center justify-center text-slate-400`}
         >
-          {value ? (
+          {previewSrc ? (
             <Image
-              src={value}
+              src={previewSrc}
               alt="preview"
               fill
               sizes="96px"

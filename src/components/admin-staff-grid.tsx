@@ -6,6 +6,7 @@ import { CalendarOff, ChevronLeft, ChevronRight, Pencil, Plus, Trash2, User } fr
 import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
 import ImageUploader from "@/components/image-uploader";
+import { resolveImageSrc } from "@/lib/image-path";
 
 type StaffRow = {
   id: number;
@@ -457,9 +458,9 @@ export default function AdminStaffGrid({
               <tr key={row.id} className="align-top text-slate-700">
                 <td className="px-4 py-3">
                   <div className="relative h-12 w-12 overflow-hidden rounded-full border border-sky-100 bg-slate-50 flex items-center justify-center text-slate-400">
-                    {row.photo_path ? (
+                    {resolveImageSrc(row.photo_path) ? (
                       <Image
-                        src={row.photo_path}
+                        src={resolveImageSrc(row.photo_path)}
                         alt={row.full_name}
                         fill
                         sizes="48px"

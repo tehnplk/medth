@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(dir, filename), buffer);
 
-    return NextResponse.json({ path: `/images/${kind}/${filename}` }, { status: 201 });
+    return NextResponse.json({ path: `/media/${kind}/${filename}` }, { status: 201 });
   } catch {
     return NextResponse.json({ error: "อัปโหลดไม่สำเร็จ" }, { status: 500 });
   }

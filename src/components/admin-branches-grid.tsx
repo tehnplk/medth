@@ -6,6 +6,7 @@ import { ImageOff, Pencil, Plus, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 import AdminModal from "@/components/admin-modal";
 import ImageUploader from "@/components/image-uploader";
+import { resolveImageSrc } from "@/lib/image-path";
 
 type BranchRow = {
   id: number;
@@ -219,9 +220,9 @@ export default function AdminBranchesGrid({ initialRows, userRole }: { initialRo
               <tr key={row.id} className="align-top text-slate-700">
                 <td className="px-4 py-3">
                   <div className="relative h-12 w-20 overflow-hidden rounded-lg border border-sky-100 bg-slate-50 flex items-center justify-center text-slate-400">
-                    {row.cover_image ? (
+                    {resolveImageSrc(row.cover_image) ? (
                       <Image
-                        src={row.cover_image}
+                        src={resolveImageSrc(row.cover_image)}
                         alt={row.name}
                         fill
                         sizes="80px"

@@ -2,6 +2,7 @@ import type mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
 import { getPool, query } from "@/lib/db";
 import { getAuditUser } from "@/lib/audit-user";
+import { normalizeImagePathForStorage } from "@/lib/image-path";
 
 type StaffRow = {
   id: number;
@@ -86,7 +87,7 @@ export async function PATCH(
     const fullName = normalizeString(body.full_name);
     const phone = normalizeNullableString(body.phone);
     const gender = normalizeGender(body.gender);
-    const photoPath = normalizeNullableString(body.photo_path);
+    const photoPath = normalizeImagePathForStorage(body.photo_path);
     const skillNote = normalizeNullableString(body.skill_note);
     const status = normalizeStatus(body.status);
 

@@ -10,6 +10,7 @@ import BookedDateInput from "@/components/booked-date-input";
 import BookingSlotButton from "@/components/booking-slot-button";
 import EmptySlotButton from "@/components/empty-slot-button";
 import SocketLiveRefresh from "@/components/socket-live-refresh";
+import { resolveImageSrc } from "@/lib/image-path";
 
 type SearchParams = Promise<{
   branch?: string | string[] | undefined;
@@ -254,9 +255,9 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
                                   : "bg-slate-50 text-slate-400"
                             }`}
                           >
-                            {s.photo_path ? (
+                            {resolveImageSrc(s.photo_path) ? (
                               <Image
-                                src={s.photo_path}
+                                src={resolveImageSrc(s.photo_path)}
                                 alt={s.full_name}
                                 fill
                                 sizes="36px"
