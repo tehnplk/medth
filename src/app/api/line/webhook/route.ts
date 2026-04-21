@@ -38,7 +38,7 @@ export async function POST(req: Request) {
           const lineId = event.source?.userId || "";
           console.log(`Received message: ${text} from ${lineId}`);
 
-          if (text === "จองคิว") {
+          if (text === "จองคิว" || text === "จอง") {
             const bookingUrl = `https://medthscphpl.online/booking?line_id=${encodeURIComponent(lineId)}`;
 
             await client.replyMessage({
