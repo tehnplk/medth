@@ -206,7 +206,7 @@ export default async function SuccessPage(props: { searchParams: SearchParams })
                         className="relative rounded-3xl border-8 border-white bg-white shadow-2xl transition-transform group-hover/qr:scale-105"
                       />
                     </div>
-                    <p className="mt-8 text-sm font-bold uppercase tracking-widest text-slate-500">แสดง QR Code เมื่อถึงโครงการ</p>
+                    <p className="mt-8 text-sm font-bold uppercase tracking-widest text-slate-500">Booking QR Code</p>
                   </div>
                 </div>
               </section>
