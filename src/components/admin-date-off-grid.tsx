@@ -23,7 +23,7 @@ type Props = {
 
 export default function AdminDateOffGrid({ initialRows, branches }: Props) {
   const [rows, setRows] = useState<DateOffRow[]>(initialRows);
-  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(null);
+  const [selectedBranchId, setSelectedBranchId] = useState<number | null>(branches[0]?.id ?? null);
   const [newDateOff, setNewDateOff] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState("");
@@ -151,17 +151,6 @@ export default function AdminDateOffGrid({ initialRows, branches }: Props) {
       ) : null}
 
       <div className="mt-5 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setSelectedBranchId(null)}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-            selectedBranchId === null
-              ? "bg-sky-600 text-white"
-              : "border border-sky-200 text-slate-700 hover:bg-sky-50"
-          }`}
-        >
-          ทั้งหมด
-        </button>
         {branches.map((branch) => (
           <button
             key={branch.id}

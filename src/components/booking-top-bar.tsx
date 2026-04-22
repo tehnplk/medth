@@ -8,24 +8,30 @@ type Props = {
 
 export default function BookingTopBar({ title, backHref }: Props) {
   return (
-    <header className="sticky top-0 z-50 flex flex-shrink-0 items-center gap-2 border-b border-violet-800 bg-violet-600 px-6 py-2 shadow-md shadow-violet-200">
-      <div className="flex items-center">
+    <header className="sticky top-0 z-50 flex h-12 flex-shrink-0 items-center gap-2 border-b border-violet-800 bg-violet-600 px-6 shadow-md shadow-violet-200">
+      <div className="flex min-w-0 items-center gap-1.5 text-white">
         {backHref && (
           <Link
             href={backHref}
-            className="group flex items-center gap-1.5 text-sm font-semibold text-white/90 transition-colors hover:text-white"
+            aria-label="ย้อนกลับ"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/15 transition-colors hover:bg-white/25"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 transition-colors group-hover:bg-white/25">
-              <ChevronLeft className="h-4 w-4" />
-            </div>
-            <span className="inline whitespace-nowrap">ย้อนกลับ</span>
+            <ChevronLeft className="h-4 w-4" />
           </Link>
         )}
+        <h1 className="min-w-0 truncate whitespace-nowrap text-sm font-semibold tracking-tight">
+          {title}
+        </h1>
       </div>
 
-      <h1 className="ml-auto min-w-0 truncate whitespace-nowrap text-right text-sm font-semibold tracking-tight text-white">
-        {title}
-      </h1>
+      {backHref && (
+        <Link
+          href={backHref}
+          className="ml-auto inline-flex items-center rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white/90 transition-colors hover:bg-white/25 hover:text-white"
+        >
+          ย้อนกลับ
+        </Link>
+      )}
     </header>
   );
 }

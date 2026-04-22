@@ -264,11 +264,11 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
                   <span className={`text-[11px] font-bold uppercase tracking-wider ${isSelected ? "text-sky-700" : "text-slate-400 group-hover:text-sky-600"}`}>
                     {item.dayLabel.replace("วัน", "")}
                   </span>
-                  <span className={`text-xl font-black ${isSelected ? "text-sky-900" : "text-slate-900"}`}>
-                    {item.dateLabel.split(" ")[0]}
-                  </span>
-                  <span className={`text-[11px] font-bold ${isSelected ? "text-sky-700" : "text-slate-500"}`}>
-                    {item.dateLabel.split(" ")[1]}
+                  <span className={`flex items-baseline gap-1 ${isSelected ? "text-sky-900" : "text-slate-900"}`}>
+                    <span className="text-xl font-black">{item.dateLabel.split(" ")[0]}</span>
+                    <span className={`text-sm font-bold ${isSelected ? "text-sky-700" : "text-slate-500"}`}>
+                      {item.dateLabel.split(" ")[1]}
+                    </span>
                   </span>
 
                   <div className={`mt-3 w-full rounded-full py-1 text-[10px] font-black tracking-tight ${
