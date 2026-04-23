@@ -22,6 +22,7 @@ type CountRow = {
 
 type BookingCountRow = {
   booking_date_key: string;
+  time_slot_id: number;
   booked_count: number;
 };
 
@@ -158,12 +159,17 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
           branchId,
         ]),
         query<BookingCountRow[]>(
-          `SELECT DATE_FORMAT(booking_date, '%Y-%m-%d') AS booking_date_key, COUNT(*) AS booked_count
-           FROM bookings
-           WHERE branch_id = ?
-             AND booking_date BETWEEN ? AND ?
-             AND is_deleted = 0
-           GROUP BY DATE_FORMAT(booking_date, '%Y-%m-%d')`,
+          `SELECT DATE_FORMAT(b.booking_date, '%Y-%m-%d') AS booking_date_key,
+                  b.time_slot_id,
+                  COUNT(*) AS booked_count
+           FROM bookings b
+           JOIN staff s ON s.id = b.staff_id
+           WHERE b.branch_id = ?
+             AND b.booking_date BETWEEN ? AND ?
+             AND b.is_deleted = 0
+             AND s.status = 'active'
+             AND s.is_deleted = 0
+           GROUP BY DATE_FORMAT(b.booking_date, '%Y-%m-%d'), b.time_slot_id`,
           [branchId, startDate, endDate],
         ),
         query<LeaveCountRow[]>(
@@ -187,9 +193,15 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
 
       const totalStaff = staffRows[0]?.total ?? 0;
       const totalSlots = slotRows[0]?.total ?? 0;
-      const bookedCountMap = new Map(
-        bookingRows.map((row) => [row.booking_date_key, Number(row.booked_count) || 0]),
-      );
+
+      // Build a map: dateKey -> [bookedCount per slot]
+      const bookedPerSlotMap = new Map<string, number[]>();
+      for (const row of bookingRows) {
+        const key = row.booking_date_key;
+        if (!bookedPerSlotMap.has(key)) bookedPerSlotMap.set(key, []);
+        bookedPerSlotMap.get(key)!.push(Number(row.booked_count) || 0);
+      }
+
       const leaveCountMap = new Map(
         leaveRows.map((row) => [row.leave_date_key, Number(row.leave_count) || 0]),
       );
@@ -201,11 +213,20 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
           item.disabled = true;
           return;
         }
-        const bookedCount = bookedCountMap.get(item.key) ?? 0;
         const leaveCount = leaveCountMap.get(item.key) ?? 0;
         const availableStaff = Math.max(totalStaff - leaveCount, 0);
-        const maxQueues = availableStaff * totalSlots;
-        item.availableQueues = Math.max(maxQueues - bookedCount, 0);
+        const slotBookings = bookedPerSlotMap.get(item.key) ?? [];
+
+        // Sum available slots: for each slot, clamp (available - booked) to 0
+        let bookedSlotCount = 0;
+        for (const booked of slotBookings) {
+          bookedSlotCount += Math.min(booked, availableStaff);
+        }
+        // Slots with no bookings contribute full availableStaff
+        const slotsWithBookings = slotBookings.length;
+        const slotsWithoutBookings = Math.max(totalSlots - slotsWithBookings, 0);
+        item.availableQueues = (availableStaff * slotsWithoutBookings) + 
+          slotBookings.reduce((sum, booked) => sum + Math.max(availableStaff - booked, 0), 0);
         item.disabled = false;
       });
     } catch {

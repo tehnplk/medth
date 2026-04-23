@@ -138,12 +138,15 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
           [branchId],
         ),
         query<BookingCountRow[]>(
-          `SELECT time_slot_id, COUNT(*) AS booked_count
-           FROM bookings
-           WHERE branch_id = ?
-             AND booking_date = ?
-             AND is_deleted = 0
-           GROUP BY time_slot_id`,
+          `SELECT b.time_slot_id, COUNT(*) AS booked_count
+           FROM bookings b
+           JOIN staff s ON s.id = b.staff_id
+           WHERE b.branch_id = ?
+             AND b.booking_date = ?
+             AND b.is_deleted = 0
+             AND s.status = 'active'
+             AND s.is_deleted = 0
+           GROUP BY b.time_slot_id`,
           [branchId, dateParam],
         ),
         query<LeaveCountRow[]>(

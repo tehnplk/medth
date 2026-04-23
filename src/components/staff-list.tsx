@@ -93,7 +93,7 @@ export default function StaffList({ initialStaff, branchId, dateParam, slotId, l
             }`}>
               {isOnLeave && (
                 <div className="absolute right-4 top-4 z-10 rotate-12 rounded-lg border-2 border-red-500 px-3 py-1 text-xs font-black uppercase text-red-500">
-                  ลาพักงาน
+                  ลาหยุด
                 </div>
               )}
               

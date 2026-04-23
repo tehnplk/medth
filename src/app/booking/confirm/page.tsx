@@ -154,7 +154,8 @@ export default async function ConfirmPage(props: { searchParams: SearchParams })
           }
         }
       }
-    } catch {
+    } catch (err) {
+      if (err && typeof err === "object" && "digest" in err) throw err;
       hasDbError = true;
     }
   }
