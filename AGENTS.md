@@ -35,7 +35,7 @@
 ## Deployment to Host
 
 - **ห้าม deploy โดยไม่ได้รับคำสั่งแยกต่างหาก** ไม่ว่าจะหลัง push หรือหลังงานเสร็จ
-- รอคำสั่ง deploy จากผู้ใช้เท่านั้น
+- รอคำสั่ง deploy จากผู้ใช้เท่านั้น และอ่าน @deploy-doc/production-host.md
 
 ## General
 
