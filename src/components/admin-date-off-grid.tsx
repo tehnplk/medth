@@ -129,10 +129,7 @@ export default function AdminDateOffGrid({ initialRows, branches }: Props) {
     <div className="rounded-[28px] border border-sky-200/80 bg-white/90 p-5 shadow-[0_16px_34px_-24px_rgba(37,99,235,0.35)] backdrop-blur">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-600">
-            Date Off
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-950">จัดการวันหยุด</h1>
+          <h1 className="text-[19px] font-semibold text-slate-950">จัดการวันหยุด</h1>
         </div>
         <button
           type="button"

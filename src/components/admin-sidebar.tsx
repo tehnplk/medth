@@ -10,6 +10,7 @@ import {
   CalendarX,
   ChevronLeft,
   ChevronRight,
+  ClipboardPlus,
   Landmark,
   LogOut,
   MapPinned,
@@ -18,6 +19,12 @@ import {
 } from "lucide-react";
 
 const menuItems = [
+  {
+    href: "/admin/record",
+    label: "ระบบงานเวชระเบียน",
+    description: "",
+    icon: ClipboardPlus,
+  },
   {
     href: "/admin/booked",
     label: "รายการจอง",

@@ -20,9 +20,10 @@
 - บันทึก screenshot ไปที่ `.playwright-cli/` เสมอ (gitignored)
 
 ## Ask to Anotate the UI
+- check  dev server on port 3001  if not avalible must run `bun dev` first
 - run command for open browser session
     ```
-    - playwright-cli open https://example.com
+    - playwright-cli open http://localhost/example
     - playwright-cli show --annotate
     ```
 - run command for user's viewer

@@ -169,10 +169,7 @@ export default async function BookedPage(props: { searchParams: SearchParams }) 
       <section className="rounded-[28px] border border-sky-200/80 bg-white/90 p-5 shadow-[0_16px_34px_-24px_rgba(37,99,235,0.35)] backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-600">
-              Booked
-            </p>
-            <h1 className="mt-1 text-2xl font-semibold text-slate-950">รายการจอง</h1>
+            <h1 className="text-[19px] font-semibold text-slate-950">รายการจอง</h1>
           </div>
         </div>
 
