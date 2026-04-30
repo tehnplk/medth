@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# medth
 
-## Getting Started
+Next.js App Router project for the `medth` application.
 
-First, run the development server:
+## Development
+
+Install dependencies with Bun:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
+bun install
+```
+
+Start the local dev server:
+
+```bash
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app is usually opened through the custom server on `http://localhost:3001`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production Deploy
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project should use Bun for production installs and builds.
 
-## Learn More
+```bash
+cd /var/www/medth
+git pull
+bun ci
+bun run build
+pm2 restart medth-app
+```
 
-To learn more about Next.js, take a look at the following resources:
+Why Bun:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `bun.lock` is the source of truth for installs in this repo
+- Bun handles platform-specific optional packages for Linux more reliably in this project
+- using `npm install` on the server can miss native packages needed by Tailwind/Lightning CSS
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Runtime: Bun / Node.js
+- Process manager on host: PM2 (`medth-app`)
+- Do not deploy unless the user explicitly asks for deploy

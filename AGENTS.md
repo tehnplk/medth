@@ -45,6 +45,8 @@
 
 - **ห้าม deploy โดยไม่ได้รับคำสั่งแยกต่างหาก** ไม่ว่าจะหลัง push หรือหลังงานเสร็จ
 - รอคำสั่ง deploy จากผู้ใช้เท่านั้น และอ่าน @deploy-doc/production-host.md
+- production install/build ให้ใช้ Bun: `bun ci`, `bun run build`, แล้ว `pm2 restart medth-app`
+- หลีกเลี่ยง `npm install` บน production เพราะอาจพลาด Linux native optional packages ที่ Tailwind/Lightning CSS ต้องใช้
 
 ## General
 
