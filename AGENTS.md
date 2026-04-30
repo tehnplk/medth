@@ -19,6 +19,12 @@
 - ไม่ต้องปิด playwright browser session หลังทำงานเสร็จ
 - บันทึก screenshot ไปที่ `.playwright-cli/` เสมอ (gitignored)
 
+## Ask to Anotate the UI
+```
+- playwright-cli open https://example.com
+- playwright-cli show --annotate
+```
+
 ## Database
 
 - การดึงหรือแก้ไขข้อมูลในฐานข้อมูลให้ใช้ **`db-cli` skill** เสมอ
