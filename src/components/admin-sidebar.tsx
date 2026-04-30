@@ -89,7 +89,7 @@ export default function AdminSidebar({ currentUserName, currentRole }: AdminSide
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-100">
                 MedTH Admin
               </p>
-              <p className="mt-2 text-lg font-semibold">จัดการข้อมูลระบบจอง</p>
+              <p className="mt-2 text-[15px] font-semibold">จัดการรระบบ</p>
             </div>
           ) : null}
           <button

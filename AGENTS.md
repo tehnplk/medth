@@ -24,6 +24,7 @@
 - playwright-cli open https://example.com
 - playwright-cli show --annotate
 ```
+*** Then wait user send you the anotatation result and edit code follow user request.***
 
 ## Database
 

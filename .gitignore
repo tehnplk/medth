@@ -52,9 +52,10 @@ next-env.d.ts
 /deploy-doc
 
 # test artifacts
+/test
+/tests
 tests/snapshots/
 tests/screenshots/
 tests/database/
 *.yml
 *.sql
-
