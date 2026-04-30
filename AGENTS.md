@@ -20,11 +20,19 @@
 - บันทึก screenshot ไปที่ `.playwright-cli/` เสมอ (gitignored)
 
 ## Ask to Anotate the UI
-```
-- playwright-cli open https://example.com
-- playwright-cli show --annotate
-```
-*** Then wait user send you the anotatation result and edit code follow user request.***
+- run command for open browser session
+    ```
+    - playwright-cli open https://example.com
+    - playwright-cli show --annotate
+    ```
+- run command for user's viewer
+    ```
+    - playwright-cli show
+    ```
+
+- Then wait user send you the anotatation result and edit code follow user request.
+
+- If stuck user login  , use  admin / 1234
 
 ## Database
 
