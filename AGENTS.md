@@ -36,10 +36,8 @@
 - If stuck user login  , use  admin / 1234
 
 ## Database
-
-- การดึงหรือแก้ไขข้อมูลในฐานข้อมูลให้ใช้ **`db-cli` skill** เสมอ
-- Connection: `db-cli -g my -H localhost -P 3306 -u root -p "112233" -d medth -e "<SQL>"`
-- Tables: `bookings`, `branches`, `staff`, `staff_leaves`, `time_slots`, `users`, `user_in_branch`, `branch_date_off`
+- use `db-cli --skill` for query data
+- read database credentail fron @.env*
 
 ## Deployment to Host
 
