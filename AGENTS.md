@@ -6,9 +6,11 @@
 ## Stack
 - **Framework**: Next.js (App Router, TypeScript)
 - **Styling**: Tailwind CSS
-- **Database**: MariaDB 11 — รันใน Docker container ชื่อ `mariadb`, database name = `medth`, ใช้ `mariadb` CLI
+- **Database**: MariaDB, database name = `medth`, ใช้ `mariadb` CLI
+  - local: MariaDB 10.6 ใน Docker container ชื่อ `mariadb`
+  - prod: MariaDB 11.8.6 — ปัจจุบันอยู่ใน container `mariadb` (port 3306), หลัง migrate จะย้ายไป `medth-db` ใน compose
 - **Runtime**: Bun / Node.js
-- **Deploy**: PM2 (`medth-app`) on remote SSH server
+- **Deploy**: remote SSH server — ปัจจุบัน PM2 (`medth-app`), กำลังย้ายเป็น Docker Compose (`compose.yaml`: `medth-app` + `medth-db`)
 
 ---
 
@@ -38,13 +40,14 @@
 ## Database
 - use `db-cli --skill` for query data
 - read database credentail fron @.env*
+- restore dump จาก prod ลง local: ต้องแทน collation `utf8mb4_uca1400_ai_ci` (มีเฉพาะ 11.x) เป็น `utf8mb4_unicode_ci` ก่อน import และ backup `medth` ของ local ก่อนทุกครั้ง เก็บ dump ไว้ใน `backups/` (gitignored)
 
 ## Deployment to Host
 
 - **ห้าม deploy โดยไม่ได้รับคำสั่งแยกต่างหาก** ไม่ว่าจะหลัง push หรือหลังงานเสร็จ
 - รอคำสั่ง deploy จากผู้ใช้เท่านั้น และอ่าน @deploy-doc/production-host.md
-- production install/build ให้ใช้ Bun: `bun ci`, `bun run build`, แล้ว `pm2 restart medth-app`
-- หลีกเลี่ยง `npm install` บน production เพราะอาจพลาด Linux native optional packages ที่ Tailwind/Lightning CSS ต้องใช้
+- production ปัจจุบัน (ก่อน migrate): `git pull` → `bun ci` → `bun run build` → `pm2 restart medth-app` (ใช้ Bun ห้าม `npm install`)
+- production หลัง migrate: build image ที่ local → `docker save` → pscp → `docker load` บน prod → `docker compose up -d` (ห้าม `--build` บน prod) ขั้นตอนเต็มอยู่ใน deploy-doc
 
 ## General
 

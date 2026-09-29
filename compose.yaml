@@ -1,0 +1,40 @@
+name: medth
+
+services:
+  app:
+    build: .
+    image: medth-app
+    container_name: medth-app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: medth-db
+      DB_PORT: 3306
+    ports:
+      - "127.0.0.1:3001:3001"
+      - "127.0.0.1:3002:3002"
+    volumes:
+      - ./public/images:/app/public/images
+    depends_on:
+      medth-db:
+        condition: service_healthy
+
+  medth-db:
+    image: mariadb:11.8.6
+    container_name: medth-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+    ports:
+      - "127.0.0.1:3309:3306"
+    volumes:
+      - medth-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  medth-db-data:
+    name: medth-db-data

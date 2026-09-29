@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.env*
+!.env.example
+public/images
+tests
+test
+.playwright-cli
+.claude
+deploy-doc
