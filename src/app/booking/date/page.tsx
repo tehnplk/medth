@@ -161,19 +161,25 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
         query<BookingCountRow[]>(
           `SELECT DATE_FORMAT(b.booking_date, '%Y-%m-%d') AS booking_date_key,
                   b.time_slot_id,
-                  COUNT(*) AS booked_count
+                  COUNT(DISTINCT b.staff_id) AS booked_count
            FROM bookings b
            JOIN staff s ON s.id = b.staff_id
+           JOIN time_slots ts ON ts.id = b.time_slot_id AND ts.branch_id = b.branch_id
            WHERE b.branch_id = ?
              AND b.booking_date BETWEEN ? AND ?
              AND b.is_deleted = 0
+             AND s.branch_id = b.branch_id
              AND s.status = 'active'
              AND s.is_deleted = 0
+             AND NOT EXISTS (
+               SELECT 1 FROM staff_leaves sl
+               WHERE sl.staff_id = s.id AND sl.leave_date = b.booking_date
+             )
            GROUP BY DATE_FORMAT(b.booking_date, '%Y-%m-%d'), b.time_slot_id`,
           [branchId, startDate, endDate],
         ),
         query<LeaveCountRow[]>(
-          `SELECT DATE_FORMAT(sl.leave_date, '%Y-%m-%d') AS leave_date_key, COUNT(*) AS leave_count
+          `SELECT DATE_FORMAT(sl.leave_date, '%Y-%m-%d') AS leave_date_key, COUNT(DISTINCT sl.staff_id) AS leave_count
            FROM staff_leaves sl
            JOIN staff s ON s.id = sl.staff_id
            WHERE s.branch_id = ? AND s.status = 'active'
@@ -217,11 +223,6 @@ export default async function DatePage(props: { searchParams: SearchParams }) {
         const availableStaff = Math.max(totalStaff - leaveCount, 0);
         const slotBookings = bookedPerSlotMap.get(item.key) ?? [];
 
-        // Sum available slots: for each slot, clamp (available - booked) to 0
-        let bookedSlotCount = 0;
-        for (const booked of slotBookings) {
-          bookedSlotCount += Math.min(booked, availableStaff);
-        }
         // Slots with no bookings contribute full availableStaff
         const slotsWithBookings = slotBookings.length;
         const slotsWithoutBookings = Math.max(totalSlots - slotsWithBookings, 0);

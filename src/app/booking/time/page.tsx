@@ -138,19 +138,24 @@ export default async function TimePage(props: { searchParams: SearchParams }) {
           [branchId],
         ),
         query<BookingCountRow[]>(
-          `SELECT b.time_slot_id, COUNT(*) AS booked_count
+          `SELECT b.time_slot_id, COUNT(DISTINCT b.staff_id) AS booked_count
            FROM bookings b
            JOIN staff s ON s.id = b.staff_id
            WHERE b.branch_id = ?
              AND b.booking_date = ?
              AND b.is_deleted = 0
+             AND s.branch_id = b.branch_id
              AND s.status = 'active'
              AND s.is_deleted = 0
+             AND NOT EXISTS (
+               SELECT 1 FROM staff_leaves sl
+               WHERE sl.staff_id = s.id AND sl.leave_date = b.booking_date
+             )
            GROUP BY b.time_slot_id`,
           [branchId, dateParam],
         ),
         query<LeaveCountRow[]>(
-          `SELECT COUNT(*) AS total
+          `SELECT COUNT(DISTINCT sl.staff_id) AS total
            FROM staff_leaves sl
            JOIN staff s ON s.id = sl.staff_id
            WHERE s.branch_id = ? AND s.status = 'active'
