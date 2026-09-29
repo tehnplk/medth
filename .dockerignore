@@ -9,3 +9,5 @@ test
 .playwright-cli
 .claude
 deploy-doc
+backups
+*.tar
