@@ -34,7 +34,7 @@ export default function AdminDateOffGrid({ initialRows, branches }: Props) {
 
   function formatThaiDate(dateStr: string): string {
     const date = new Date(dateStr);
-    const dayNames = ["อา", "จ", "อ", "พฤ", "พฤ", "ศ", "ส"];
+    const dayNames = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
     const monthNames = [
       "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.",
       "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."

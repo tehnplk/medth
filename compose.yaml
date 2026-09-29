@@ -23,6 +23,7 @@ services:
     image: mariadb:11.8.6
     container_name: medth-db
     restart: unless-stopped
+    command: --default-time-zone=+07:00
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
       MARIADB_DATABASE: ${DB_NAME}
