@@ -8,7 +8,7 @@
 - **Styling**: Tailwind CSS
 - **Database**: MariaDB, database name = `medth`, ใช้ `mariadb` CLI
   - local: MariaDB 10.6 ใน Docker container ชื่อ `mariadb`
-  - prod: MariaDB 11.8.6 ใน container `medth-db` (compose, `127.0.0.1:3309`) — container `mariadb` (3306) เป็นของเก่า ไม่ใช่ของ project นี้แล้ว
+  - prod: MariaDB 11.8.6 ใน container `medth-db` (compose, `127.0.0.1:3309`)
 - **Runtime**: Bun / Node.js
 - **Deploy**: Docker Compose (`compose.yaml`: `medth-app` + `medth-db`) on remote SSH server
 
